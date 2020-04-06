@@ -113,17 +113,41 @@ def openBrowser():
 
 #SETTINGS GUI
 lastSelected = ''
+lastSelectedIndex = 0
 def settings():
     global config, browserApps, defaultBrowser, uriPrefs
     def lbSelected_update():
+        global uriPrefs
         lbSelected.delete(0, END)
         for uriPref in uriPrefs: lbSelected.insert(END, uriPref)
     def lbSelected_cb(event):
-        global lastSelected
-        try: lastSelected = lbSelected.get(lbSelected.curselection())
+        global lastSelected, uriPrefs
+        try: lastSelected = lbSelected.get(lbSelected.curselection()); lastSelectedIndex = lbSelected.nearest(event.y)
         except: print('None selected')
-        if not (lastSelected == ''):
-            cbBrowsers.current(  cbBrowsers['values'].index(browserApps[uriPrefs[lastSelected]][0])   )
+        if (lastSelected == ''): return
+
+        cbBrowsers.current(  cbBrowsers['values'].index(browserApps[uriPrefs[lastSelected]][0])   )
+    def lbSelected_move(event):
+        global lastSelectedIndex, uriPrefs
+        i = lbSelected.nearest(event.y)
+        if i < lastSelectedIndex:
+            x = lbSelected.get(i)
+            lbSelected.delete(i)
+            lbSelected.insert(i+1, x)
+            lastSelectedIndex = i
+        elif i > lastSelectedIndex:
+            x = lbSelected.get(i)
+            lbSelected.delete(i)
+            lbSelected.insert(i-1, x)
+            lastSelectedIndex = i
+        values = lbSelected.get(0, END)
+        tmp = {}
+        for value in values:
+            for uriPref in uriPrefs:
+                if (uriPref == value):
+                    tmp.update({uriPref: uriPrefs[uriPref]})
+        uriPrefs = tmp
+        saveConfig()
     def cbBrowsers_cb(event):
         global lastSelected
         if (lastSelected == ''): return
@@ -172,6 +196,7 @@ def settings():
     lbSelected.grid(column=0, row=1, columnspan=2)
     lbSelected_update()
     lbSelected.bind("<<ListboxSelect>>", lbSelected_cb)
+    #lbSelected.bind('<B1-Motion>', lbSelected_move) #buggy
 
     btnAdd = Button(root, text = "Add Rule", command = btnAdd_cb)  
     btnAdd.grid(column=0, row=0)
