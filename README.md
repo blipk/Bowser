@@ -4,24 +4,27 @@ Set up rules to open specific URLs in specific web browsers.
 
 ### Installation
 
-Run the provided shell script to install Bowser
+Run the provided shell script to install Bowser:
 
  ```./install.sh```
 
-### General Usage
 Bowser will open after running the installer script, from there you can set up rules. 
 
-To open the rules settings again, open Bowser from your desktop environments application menus, or see the CLI options below.
+### General Usage
+
+Open Bowser from your desktop environments application menu to change the rules, or see the CLI options below.
 
 ![Bowser Settings GUI](SettingsGUI.png?raw=true "Screenshot of Bowser Settings GUI")
 
-Select a rule and the web browser it opens with will show in the drop down box, 
-choose another browser to make it the default for that rule.
+Select a rule and the web browser it opens with will show in the drop down box.
 
-Use Add/Delete to open a dialog to create a new rule, or delete the currently selected rule
-Use the Import/Export buttons to save and load your rule configurations
+Choose another browser to make it the default for the selected rule.
 
-All changes are saved as they are done.
+Use Add/Delete to open a dialog to create a new rule, or delete the currently selected rule.
+
+Use the Import/Export buttons to save and load your rule configurations.
+
+All changes are saved as they are made.
 
 ### CLI Usage
 Open the Bowser rules settings window:
