@@ -8,4 +8,4 @@ sudo cp bowser.desktop /usr/share/applications
 sudo chmod +777 /usr/share/applications/bowser.desktop
 sudo cp bowser.svg /usr/share/icons/hicolor/scalable/apps
 sudo cp bowser.png /usr/share/icons/hicolor/256x256/apps
-python3 ~/.config/bowser/bowser.py --settings
+python3 ~/.config/bowser/bowser.py

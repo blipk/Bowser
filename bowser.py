@@ -4,11 +4,8 @@
  * allowing you to set up rules that will match a string against URLs and open them with a specific browser.
  *
  * Run ./install.sh' to begin.
+ * See README.md for advanced options.
  *
- * Run 'python3 ~/.config/bowser/bowser.py --settings' for settings
- * Run 'python3 ~/.config/bowser/bowser.py --setup' to rescan browsers and set Bowser as the default
- * Run 'python3 ~/.config/bowser/bowser.py --reset' to reset your default browser to handle all URLs
- * 
  * This file is part of bowser linux application
  * Copyright (C) 2020 A.D. - http://kronosoul.xyz
  * 
@@ -32,7 +29,7 @@ import json
 import tkinter
 import subprocess
 from tkinter import *
-from tkinter import ttk, simpledialog, filedialog
+from tkinter import ttk, simpledialog, filedialog, messagebox
 from os import listdir, path
 from os.path import isfile, join, expanduser
 
@@ -85,11 +82,15 @@ def setup():
                     list(filter(    lambda x: x != "", contents[mimesLoc+9:contents.find("\n", mimesLoc)].split(';') ))
                 ]})
 
-    if not bool(uriPrefs): uriPrefs = {'youtube.com': defaultBrowser}
+    if not bool(uriPrefs): uriPrefs = {'youtube.com': defaultBrowser, 'youtu.be': defaultBrowser}
     associateMimetypes();
     saveConfig()
+    print('Setup completed and config saved');
+    messagebox.showinfo(title=None, message="Your installed web browsers have been detected and Bowser has been enabled.")
 def reset():
     associateMimetypes(defaultBrowser);
+    print(defaultBrowser + ' is now the default browser'); 
+    messagebox.showinfo(title=None, message="Bowser has been disabled and links will now open with " + browserApps[defaultBrowser][0] + ".")
 def associateMimetypes(browser='bowser.desktop'):
     global browserApps
     allMimes = []
@@ -99,6 +100,16 @@ def associateMimetypes(browser='bowser.desktop'):
     for mime in allMimes: os.system('xdg-mime default ' + browser + ' ' + mime) #silent
     #for mime in allMimes: os.system('gio mime ' + mime + ' ' + browser)
 #END SETUP
+
+#MAIN
+def openBrowser():
+    for k in config['uriPrefs']:
+        if (URI.find(k) > -1):
+            execCmd = browserApps.get(uriPrefs[k])[1].replace("%u", URI)
+            os.system(execCmd)
+            exit() #if a preference is found, don't continue to opening in default
+    execCmd = browserApps.get(defaultBrowser)[1].replace("%u", URI)
+    os.system(execCmd);
 
 #SETTINGS GUI
 lastSelected = ''
@@ -147,10 +158,14 @@ def settings():
         config = json.load(inFile); inFile.close()
         saveConfig(); readConfig()
         lbSelected_update()
+    def openAppWebsite():
+        global URI
+        URI = 'https://github.com/blipk/Bowser'
+        openBrowser()
 
     lastSelected = ''
     root = Tk()
-    root.title("Bowser Redirection Settings")
+    root.title("Bowser")
     root.iconphoto(False, PhotoImage(file='/usr/share/icons/hicolor/256x256/apps/bowser.png'))
 
     lbSelected = Listbox(root)
@@ -158,9 +173,9 @@ def settings():
     lbSelected_update()
     lbSelected.bind("<<ListboxSelect>>", lbSelected_cb)
 
-    btnAdd = Button(root, text = "Add", command = btnAdd_cb)  
+    btnAdd = Button(root, text = "Add Rule", command = btnAdd_cb)  
     btnAdd.grid(column=0, row=0)
-    btnDelete = Button(root, text = "Delete", command = btnDelete_cb)  
+    btnDelete = Button(root, text = "Delete Rule", command = btnDelete_cb)  
     btnDelete.grid(column=1, row=0)
     
     values = []
@@ -169,15 +184,28 @@ def settings():
     cbBrowsers.grid(column=0, row=2, columnspan=2)
     cbBrowsers['values'] = values
     cbBrowsers.bind("<<ComboboxSelected>>", cbBrowsers_cb)
-    
-    btnExport = Button(root, text = "Export", command = exportConfig)  
-    btnExport.grid(column=0, row=3)
-    btnImport = Button(root, text = "Import", command = importConfig)  
-    btnImport.grid(column=1, row=3)   
 
+    menubar = Menu(root)
+    filemenu = Menu(menubar, tearoff=0)
+
+    filemenu.add_command(label="Export Rules", command = exportConfig)
+    filemenu.add_command(label="Import Rules", command = importConfig)
+    filemenu.add_separator()
+    filemenu.add_command(label="Exit", command = root.quit)
+    menubar.add_cascade(label="File", menu = filemenu)
+
+    settingsmenu = Menu(menubar, tearoff=0)
+    #settingsmenu.add_command(label="Enable Bowser", command = associateMimetypes)
+    settingsmenu.add_command(label="Enable Bowser and detect installed web browsers", command = setup)
+    settingsmenu.add_command(label="Disable Bowser", command = reset)
+    menubar.add_cascade(label="Settings", menu = settingsmenu)
+
+    helpmenu = Menu(menubar, tearoff=0)
+    helpmenu.add_command(label="About...", command=openAppWebsite)
+    menubar.add_cascade(label="Help", menu=helpmenu)
+
+    root.config(menu=menubar)
     root.mainloop()
-
-
     exit()
 #END settings
 
@@ -185,16 +213,7 @@ def settings():
 if not (path.exists(configFile)): setup()
 else: readConfig()
 if (URI == '--settings'): settings()
-if (URI == '--reset'): reset(); settings()
-if (URI == '--setup'): setup(); settings()
-
-
-#open based on uriPrefs
-for k in config['uriPrefs']:
-    if (URI.find(k) > -1):
-        execCmd = browserApps.get(uriPrefs[k])[1].replace("%u", URI)
-        os.system(execCmd)
-        exit() #if a preference is found, don't continue to opening in default
-execCmd = browserApps.get(defaultBrowser)[1].replace("%u", URI)
-os.system(execCmd);
+if (URI == '--reset'): reset(); exit()
+if (URI == '--setup'): setup(); settings();
+openBrowser()
 

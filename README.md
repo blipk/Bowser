@@ -14,17 +14,23 @@ Bowser will open after running the installer script, from there you can set up r
 
 Open Bowser from your desktop environments application menu to change the rules, or see the CLI options below.
 
-![Bowser Settings GUI](SettingsGUI.png?raw=true "Screenshot of Bowser Settings GUI")
+![Bowser Settings GUI](BowserGUI.png?raw=true "Screenshot of Bowser Settings GUI")
 
 Select a rule and the web browser it opens with will show in the drop down box.
 
 Choose another browser to make it the default for the selected rule.
 
-Use Add/Delete to open a dialog to create a new rule, or delete the currently selected rule.
-
-Use the Export/Import buttons to save and load your rule configurations.
+Use the buttons to create and delete rules.
 
 All changes are saved as they are made.
+
+Use the File menu to Export or Import your rules configuration from files for backup.
+
+Use the Settings menu to enable/disable Bowser, and to detect installed web browsers.
+
+Use the Help menu to find this readme.
+
+
 
 ### CLI Usage
 Open the Bowser rules settings window:
