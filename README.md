@@ -4,11 +4,10 @@ Acts as the default web browser and allows you to set up rules to open specific 
 
 ### Installation
 
-Run the provided shell script to install Bowser:
+Run Bowser with python3 to install:
 
- ```./install.sh```
+ ```python3 bowser.py```
 
-Bowser will open after running the installer script, from there you can set up rules. 
 
 ### General Usage
 
@@ -51,7 +50,11 @@ Reset your default browser to handle all URLs:
 
 This should work in most linux desktop environments.
 
-There are some dependencies which the install script should cover.
+May require dependencies
+```
+sudo apt install python3 python3-tk
+sudo yum install python3 python3-tkinter
+```
 
 ### Licence
 

@@ -37,7 +37,6 @@ homePath = expanduser("~")
 appPath = '/usr/share/applications/'
 configDir = homePath + '/.config/bowser/'
 configFile = homePath + '/.config/bowser/bowser.conf'
-if not (path.exists(appPath + '/bowser.desktop')): print("Please run the install script."); exit()
 try: URI = sys.argv[1]
 except: URI = '--settings'
 
@@ -50,7 +49,7 @@ defaultBrowser = subprocess.check_output(['xdg-mime', 'query', 'default', 'text/
 def saveConfig(cFile = configFile):
     global config, browserApps, defaultBrowser, uriPrefs, configFile
     if not bool(config): config = {'browserApps': browserApps, 'defaultBrowser': defaultBrowser, 'uriPrefs': uriPrefs}
-    if not path.exists(configDir): os.mkdir(configDir)
+    if not path.exists(configDir): os.makedirs(configDir)
     if not path.exists(cFile): os.mknod(cFile)
     with open(cFile, 'w+') as file: file.write(json.dumps(config)); file.close()
 def readConfig(cFile = configFile):
@@ -62,7 +61,13 @@ def readConfig(cFile = configFile):
 #END config
 
 #SETUP
+if not path.exists(homePath+'/.local/share/icons/hicolor/256x256/apps/'): os.makedirs(homePath+'/.local/share/icons/hicolor/256x256/apps/')
+if not path.exists(homePath+'/.local/share/icons/hicolor/scalable/apps/'): os.makedirs(homePath+'/.local/share/icons/hicolor/scalable/apps/')
+os.system("cp bowser.svg ~/.local/share/icons/hicolor/scalable/apps && cp bowser.png ~/.local/share/icons/hicolor/256x256/apps")
 def setup():
+    os.system("mkdir ~/.config/bowser/ && cp bowser.py ~/.config/bowser/ && chmod +777 ~/.config/bowser/bowser.py")
+    os.system("xdg-desktop-menu install bowser.desktop --novendor")
+
     global browserApps, defaultBrowser, uriPrefs
     installedApps = [f for f in listdir(appPath) if isfile(join(appPath, f))]
     for app in installedApps:
@@ -190,7 +195,7 @@ def settings():
     lastSelected = ''
     root = Tk()
     root.title("Bowser")
-    root.iconphoto(False, PhotoImage(file='/usr/share/icons/hicolor/256x256/apps/bowser.png'))
+    #root.iconphoto(False, PhotoImage(file='/usr/share/icons/hicolor/256x256/apps/bowser.png'))
 
     lbSelected = Listbox(root)
     lbSelected.grid(column=0, row=1, columnspan=2)
