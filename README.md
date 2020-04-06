@@ -1,6 +1,6 @@
 ## Bowser for linux
 
-Set up rules to open specific URLs in specific web browsers.
+Acts as the default web browser and allows you to set up rules to open specific URLs in specific web browsers.
 
 ### Installation
 
@@ -22,7 +22,7 @@ Choose another browser to make it the default for the selected rule.
 
 Use Add/Delete to open a dialog to create a new rule, or delete the currently selected rule.
 
-Use the Import/Export buttons to save and load your rule configurations.
+Use the Export/Import buttons to save and load your rule configurations.
 
 All changes are saved as they are made.
 
@@ -33,7 +33,7 @@ Open the Bowser rules settings window:
  
  ```python3 ~/.config/bowser/bowser.py --settings```
 
-Runs initial setup again - rescans installed browsers and set Bowser as the default:
+Runs initial setup again - rescans installed browsers and sets Bowser as the default:
 
  ```python3 ~/.config/bowser/bowser.py --setup```
 
