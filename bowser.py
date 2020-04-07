@@ -37,6 +37,7 @@ from functools import partial
 
 homePath = expanduser("~")
 appPath = '/usr/share/applications/'
+userAppPath = homePath+'/.local/share/applications/'
 configDir = homePath + '/.config/bowser/'
 configFile = homePath + '/.config/bowser/bowser.conf'
 try: URI = sys.argv[1]
@@ -73,21 +74,24 @@ def readConfig(cFile = configFile):
 if not path.exists(homePath+'/.local/share/icons/hicolor/256x256/apps/'): os.makedirs(homePath+'/.local/share/icons/hicolor/256x256/apps/')
 if not path.exists(homePath+'/.local/share/icons/hicolor/scalable/apps/'): os.makedirs(homePath+'/.local/share/icons/hicolor/scalable/apps/')
 os.system("cp bowser.svg ~/.local/share/icons/hicolor/scalable/apps && xdg-icon-resource install --novendor --context apps --size 256 bowser.png bowser")
-def setup():
+def setup(init = False):
     os.system("mkdir ~/.config/bowser/")
     os.system("cp bowser.py ~/.config/bowser/ && chmod +777 ~/.config/bowser/bowser.py")
+    os.system("cp bowser.png ~/.config/bowser/")
     os.system("xdg-desktop-menu install bowser.desktop --novendor")
-
+    
     global browserApps, defaultBrowser, uriPrefs
-    installedApps = [f for f in listdir(appPath) if isfile(join(appPath, f))]
+    installedApps = [appPath+f for f in listdir(appPath) if isfile(join(appPath, f))]
+    installedApps += [userAppPath+f for f in listdir(userAppPath) if isfile(join(userAppPath, f))]
     for app in installedApps:
-        if (app == 'bowser.desktop'): continue
-        f = open(appPath+app,"r"); contents = f.read(); f.close()
+        if (app.find('bowser.desktop') > -1): continue
+        f = open(app, "r"); contents = f.read(); f.close()
 
         catLoc = contents.find("Categories=")
         if (catLoc > -1): 
             cats = contents[catLoc:contents.find("\n", catLoc)]
             if (cats.find("WebBrowser") > -1):
+                print('Adding ' + app)
                 nameLoc = contents.find("Name=")
                 execLoc = contents.find("Exec=")
                 mimesLoc = contents.find("MimeType=")
@@ -98,29 +102,33 @@ def setup():
                 ]})
 
     currentBrowser = subprocess.check_output(['xdg-settings', 'get', 'default-web-browser']).decode('utf-8').replace('\n', '');
-    if not (currentBrowser == 'bowser.desktop'): defaultBrowser = currentBrowser; associateMimetypes();
+    if (not currentBrowser == 'bowser.desktop' and init == True): defaultBrowser = currentBrowser; setxdgDefaultWebBrowser();
     if (defaultBrowser == 'bowser.desktop' or defaultBrowser == ''): defaultBrowser = list(browserApps)[0]
     if not bool(uriPrefs): uriPrefs = {'youtube.com': defaultBrowser, 'youtu.be': defaultBrowser}
     saveConfig()
     print('Setup completed and config saved');
-    messagebox.showinfo(title=None, message="Your installed web browsers have been detected and Bowser has been enabled.")
-def reset():
-    associateMimetypes(defaultBrowser);
-    print(defaultBrowser + ' is now the default browser'); 
-    messagebox.showinfo(title=None, message="Bowser has been disabled and links will now open with " + browserApps[defaultBrowser][0] + ".")
-def associateMimetypes(browser='bowser.desktop'):
+def setxdgDefaultWebBrowser(browser='bowser.desktop'):
     os.system('xdg-settings set default-web-browser ' + browser)
-
+    print(browser + ' is now the default browser');
+def detectWebBrowsers():
+    setup(False)
+    messagebox.showinfo(title=None, message="Your installed web browsers have been scanned and updated.")
+def disableBowser():
+    setxdgDefaultWebBrowser(defaultBrowser);
+    messagebox.showinfo(title=None, message="Bowser has been disabled and links will now open with " + browserApps[defaultBrowser][0] + ".")
+def enableBowser():
+    setxdgDefaultWebBrowser()
+    messagebox.showinfo(title=None, message="Bowser has been enabled, rules are active.")
 #END SETUP
 
 #MAIN
 def openBrowser():
     for k in config['uriPrefs']:
         if (URI.find(k) > -1):
-            execCmd = browserApps.get(uriPrefs[k])[1].replace("%u", URI)
+            execCmd = browserApps.get(uriPrefs[k])[1].replace("%u", URI).replace("%U", URI)
             os.system(execCmd)
             exit() #if a preference is found, don't continue to opening in default
-    execCmd = browserApps.get(defaultBrowser)[1].replace("%u", URI)
+    execCmd = browserApps.get(defaultBrowser)[1].replace("%u", URI).replace("%U", URI)
     os.system(execCmd);
 
 #SETTINGS GUI
@@ -207,10 +215,9 @@ def settings():
         print(browserApps[defaultBrowser][0] + ' is now the default browser')
         ui_update()
 
-    lastSelected = ''
     root = Tk()
     root.title("Bowser")
-    root.iconphoto(False, PhotoImage(file='bowser.png'))
+    root.iconphoto(False, PhotoImage(file='/home/kronosoul/.config/bowser/bowser.png'))
 
     lbPrefs = Listbox(root)
     lbPrefs.grid(column=0, row=1, columnspan=2)
@@ -222,12 +229,12 @@ def settings():
     btnDelete = Button(root, text = "Delete Rule", command = btnDelete_cb)  
     btnDelete.grid(column=1, row=0)
     
+    dbBrowsers = ttk.Combobox(root)
+    dbBrowsers.grid(column=0, row=2, columnspan=2)    
+    dbBrowsers.bind("<<ComboboxSelected>>", dbBrowsers_cbSelected)
     values = []
     for browserApp in browserApps: values.append(browserApps[browserApp][0])
-    dbBrowsers = ttk.Combobox(root)
-    dbBrowsers.grid(column=0, row=2, columnspan=2)
     dbBrowsers['values'] = values
-    dbBrowsers.bind("<<ComboboxSelected>>", dbBrowsers_cbSelected)
 
     menubar = Menu(root)
 
@@ -238,19 +245,19 @@ def settings():
     filemenu.add_command(label="Exit", command = root.quit)
     menubar.add_cascade(label="File", menu = filemenu)
 
-
     settingsmenu = Menu(menubar, tearoff=0)
     browsermenu = Menu(settingsmenu, tearoff=0)
     settingsmenu.add_cascade(label="Default Web Browser", menu = browsermenu)
-    browsermenu_update() #settingsmenu.bind( '<<MenuSelect>>', browsermenu_update)
-    settingsmenu.add_command(label="Enable Bowser and detect installed web browsers", command = setup)
-    settingsmenu.add_command(label="Disable Bowser", command = reset)
+    browsermenu_update()
+    settingsmenu.add_command(label="Enable Bowser", command = enableBowser)
+    settingsmenu.add_command(label="Disable Bowser", command = disableBowser)
+    settingsmenu.add_command(label="Detect installed web browsers", command = lambda:[detectWebBrowsers(), ui_update()])
     menubar.add_cascade(label="Settings", menu = settingsmenu)
 
 
     helpmenu = Menu(menubar, tearoff=0)
-    helpmenu.add_command(label="About...", command=openAppWebsite)
-    menubar.add_cascade(label="Help", menu=helpmenu)
+    helpmenu.add_command(label="About...", command = openAppWebsite)
+    menubar.add_cascade(label="Help", menu = helpmenu)
 
     root.config(menu=menubar)
     root.mainloop()
@@ -260,7 +267,8 @@ def settings():
 #MAIN
 if not (path.exists(configFile)): setup()
 else: readConfig()
-if (URI == '--settings'): settings()
-if (URI == '--reset'): reset(); exit()
+if (URI == '--enable'): setxdgDefaultWebBrowser(); exit()
+if (URI == '--disable'): setxdgDefaultWebBrowser(defaultBrowser); exit()
+if (URI == '--settings'): settings(); 
 if (URI == '--setup'): setup(); settings();
 openBrowser()

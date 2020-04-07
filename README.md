@@ -44,7 +44,11 @@ Runs initial setup again - rescans installed browsers and sets Bowser as the def
 
 Reset your default browser to handle all URLs:
 
- ```python3 ~/.config/bowser/bowser.py --reset```
+ ```python3 ~/.config/bowser/bowser.py --disable```
+
+Enable Bowser and sets rules to active:
+
+ ```python3 ~/.config/bowser/bowser.py --enable```
 
 ### Support
 
