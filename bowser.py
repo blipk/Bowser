@@ -3,10 +3,10 @@
  * Uses XDG desktop entries to find installed web browsers and sets itself as the default,
  * allowing you to set up rules that will match a string against URLs and open them with a specific browser.
  *
- * Run ./install.sh' to begin.
- * See README.md for advanced options.
+ * Run 'python3 bowser.py' to begin.
+ * See README.md for usage and advanced options.
  *
- * This file is part of bowser linux application
+ * This file is part of the Bowser linux application
  * Copyright (C) 2020 A.D. - http://kronosoul.xyz
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -28,10 +28,12 @@ import os
 import json
 import tkinter
 import subprocess
+import functools
 from tkinter import *
 from tkinter import ttk, simpledialog, filedialog, messagebox
 from os import listdir, path
 from os.path import isfile, join, expanduser
+from functools import partial
 
 homePath = expanduser("~")
 appPath = '/usr/share/applications/'
@@ -44,28 +46,36 @@ except: URI = '--settings'
 config = {}
 browserApps = {}
 uriPrefs = {}
-defaultBrowser = subprocess.check_output(['xdg-mime', 'query', 'default', 'text/html']).decode('utf-8')
-
+defaultBrowser = ''
+def cleanConfig():
+    global browserApps
+    for browserApp in browserApps: 
+        try: del browserApps[browserApp][3]   #Remove Tk.BooleanVar which is used for GUI state
+        except: print('Unused')
 def saveConfig(cFile = configFile):
     global config, browserApps, defaultBrowser, uriPrefs, configFile
-    if not bool(config): config = {'browserApps': browserApps, 'defaultBrowser': defaultBrowser, 'uriPrefs': uriPrefs}
+    cleanConfig()
+    config = {'browserApps': browserApps, 'defaultBrowser': defaultBrowser, 'uriPrefs': uriPrefs}
     if not path.exists(configDir): os.makedirs(configDir)
     if not path.exists(cFile): os.mknod(cFile)
     with open(cFile, 'w+') as file: file.write(json.dumps(config)); file.close()
+    print("Config saved.")
 def readConfig(cFile = configFile):
     global config, browserApps, defaultBrowser, uriPrefs
     with open(cFile, 'r') as file: config = json.load(file); file.close()
     browserApps = config['browserApps']
     defaultBrowser = config['defaultBrowser']
     uriPrefs = config['uriPrefs']
+    print("Config read.")
 #END config
 
 #SETUP
 if not path.exists(homePath+'/.local/share/icons/hicolor/256x256/apps/'): os.makedirs(homePath+'/.local/share/icons/hicolor/256x256/apps/')
 if not path.exists(homePath+'/.local/share/icons/hicolor/scalable/apps/'): os.makedirs(homePath+'/.local/share/icons/hicolor/scalable/apps/')
-os.system("cp bowser.svg ~/.local/share/icons/hicolor/scalable/apps && cp bowser.png ~/.local/share/icons/hicolor/256x256/apps")
+os.system("cp bowser.svg ~/.local/share/icons/hicolor/scalable/apps && xdg-icon-resource install --novendor --context apps --size 256 bowser.png bowser")
 def setup():
-    os.system("mkdir ~/.config/bowser/ && cp bowser.py ~/.config/bowser/ && chmod +777 ~/.config/bowser/bowser.py")
+    os.system("mkdir ~/.config/bowser/")
+    os.system("cp bowser.py ~/.config/bowser/ && chmod +777 ~/.config/bowser/bowser.py")
     os.system("xdg-desktop-menu install bowser.desktop --novendor")
 
     global browserApps, defaultBrowser, uriPrefs
@@ -87,8 +97,11 @@ def setup():
                     list(filter(    lambda x: x != "", contents[mimesLoc+9:contents.find("\n", mimesLoc)].split(';') ))
                 ]})
 
+    #currentBrowser = subprocess.check_output(['xdg-mime', 'query', 'default', 'text/html']).decode('utf-8').replace('\n', '');
+    currentBrowser = subprocess.check_output(['xdg-settings', 'get', 'default-web-browser']).decode('utf-8').replace('\n', '');
+    if not (currentBrowser == 'bowser.desktop'): defaultBrowser = currentBrowser; associateMimetypes();
+    if (defaultBrowser == 'bowser.desktop' or defaultBrowser == ''): defaultBrowser = list(browserApps)[0]
     if not bool(uriPrefs): uriPrefs = {'youtube.com': defaultBrowser, 'youtu.be': defaultBrowser}
-    associateMimetypes();
     saveConfig()
     print('Setup completed and config saved');
     messagebox.showinfo(title=None, message="Your installed web browsers have been detected and Bowser has been enabled.")
@@ -97,13 +110,17 @@ def reset():
     print(defaultBrowser + ' is now the default browser'); 
     messagebox.showinfo(title=None, message="Bowser has been disabled and links will now open with " + browserApps[defaultBrowser][0] + ".")
 def associateMimetypes(browser='bowser.desktop'):
+    '''
     global browserApps
     allMimes = []
     for k in browserApps: allMimes.append(browserApps[k][2])
     allMimes = list(dict.fromkeys(allMimes[0])) #remove duplicates
     allMimes = list(filter(lambda x: x != "", allMimes)) #remove empties
-    for mime in allMimes: os.system('xdg-mime default ' + browser + ' ' + mime) #silent
+    #for mime in allMimes: os.system('xdg-mime default ' + browser + ' ' + mime) #silent
     #for mime in allMimes: os.system('gio mime ' + mime + ' ' + browser)
+    '''
+    os.system('xdg-settings set default-web-browser ' + browser)
+
 #END SETUP
 
 #MAIN
@@ -121,87 +138,114 @@ lastSelected = ''
 lastSelectedIndex = 0
 def settings():
     global config, browserApps, defaultBrowser, uriPrefs
-    def lbSelected_update():
+    def ui_update():
+        lbPrefs_update()
+        browsermenu_update()
+        saveConfig(); readConfig()
+        browsermenu_update()
+    def browsermenu_update(event = None):
+        global defaultBrowser
+        browsermenu.delete(0, END)
+        for browserApp in browserApps:
+            try: browserApps[browserApp][3]
+            except IndexError: browserApps[browserApp].append(BooleanVar())
+            if (defaultBrowser == browserApp): browserApps[browserApp][3].set(True)
+            else: browserApps[browserApp][3].set(False)
+            browsermenu.add_checkbutton(label = browserApps[browserApp][0], onvalue=1, offvalue=0, 
+                                                                            variable = browserApps[browserApp][3], 
+                                                                            command = functools.partial(updateDefaultBrowser, browserApp))
+    def lbPrefs_update():
         global uriPrefs
-        lbSelected.delete(0, END)
-        for uriPref in uriPrefs: lbSelected.insert(END, uriPref)
-    def lbSelected_cb(event):
+        lbPrefs.delete(0, END)
+        for uriPref in uriPrefs: lbPrefs.insert(END, uriPref)
+    def lbPrefs_cbSelected(event):
         global lastSelected, uriPrefs
-        try: lastSelected = lbSelected.get(lbSelected.curselection()); lastSelectedIndex = lbSelected.nearest(event.y)
+        try: lastSelected = lbPrefs.get(lbPrefs.curselection()); lastSelectedIndex = lbPrefs.nearest(event.y)
         except: print('None selected')
         if (lastSelected == ''): return
-
-        cbBrowsers.current(  cbBrowsers['values'].index(browserApps[uriPrefs[lastSelected]][0])   )
-    def lbSelected_move(event):
+        dbBrowsers.current(  dbBrowsers['values'].index(browserApps[uriPrefs[lastSelected]][0])   )
+    def lbPrefs_cbMove(event):
         global lastSelectedIndex, uriPrefs
-        i = lbSelected.nearest(event.y)
+        i = lbPrefs.nearest(event.y)
         if i < lastSelectedIndex:
-            x = lbSelected.get(i)
-            lbSelected.delete(i)
-            lbSelected.insert(i+1, x)
+            x = lbPrefs.get(i)
+            lbPrefs.delete(i); lbPrefs.insert(i+1, x)
             lastSelectedIndex = i
         elif i > lastSelectedIndex:
-            x = lbSelected.get(i)
-            lbSelected.delete(i)
-            lbSelected.insert(i-1, x)
+            x = lbPrefs.get(i)
+            lbPrefs.delete(i); lbPrefs.insert(i-1, x)
             lastSelectedIndex = i
-        values = lbSelected.get(0, END)
+        values = lbPrefs.get(0, END)
         tmp = {}
         for value in values:
             for uriPref in uriPrefs:
                 if (uriPref == value):
                     tmp.update({uriPref: uriPrefs[uriPref]})
         uriPrefs = tmp
-        saveConfig()
-    def cbBrowsers_cb(event):
+        ui_update()
+    def dbBrowsers_cbSelected(event):
         global lastSelected
         if (lastSelected == ''): return
         selectedApp = ''
         for browserApp in browserApps:
-            if(browserApps[browserApp][0] == cbBrowsers['values'][cbBrowsers.current()]): selectedApp = browserApp
+            if(browserApps[browserApp][0] == dbBrowsers['values'][dbBrowsers.current()]): selectedApp = browserApp
         uriPrefs[lastSelected] = selectedApp
-        saveConfig()
+        ui_update()
     def btnDelete_cb():
         global lastSelected
         if (lastSelected == ''): return
-        del uriPrefs[lbSelected.get(lbSelected.curselection())]
-        lbSelected.delete(ANCHOR)
-        saveConfig()
-        lbSelected_update()
+        del uriPrefs[lbPrefs.get(lbPrefs.curselection())]
+        lbPrefs.delete(ANCHOR)
+        ui_update()
     def btnAdd_cb():
         out = ''
         out = simpledialog.askstring("New Rule", "Text/Domain to search for in URI passed to web browser:")
         uriPrefs.update({out: defaultBrowser})
-        saveConfig()
-        lbSelected_update()
+        ui_update()
+    def importConfig():
+        print('Importing Config')
+        global config, browserApps, uriPrefs, defaultBrowser
+        inFile = filedialog.askopenfile()
+        if (inFile == None): print('No file selected'); return
+        config = json.load(inFile); inFile.close()
+        browserApps = config['browserApps']
+        defaultBrowser = config['defaultBrowser']
+        print(defaultBrowser)
+        uriPrefs = config['uriPrefs']
+        ui_update()
     def exportConfig():
         global config
         outFile = filedialog.asksaveasfile()
         if (outFile == None): print('No file selected'); return
+        cleanConfig()
         outFile.write(json.dumps({'browserApps': browserApps, 'defaultBrowser': defaultBrowser, 'uriPrefs': uriPrefs})); 
         outFile.close()
-    def importConfig():
-        global config
-        inFile = filedialog.askopenfile()
-        if (inFile == None): print('No file selected'); return
-        config = json.load(inFile); inFile.close()
-        saveConfig(); readConfig()
-        lbSelected_update()
     def openAppWebsite():
         global URI
         URI = 'https://github.com/blipk/Bowser'
         openBrowser()
+    def updateDefaultBrowser(newDefault):
+        global defaultBrowser, browserApps
+        for browserApp in browserApps:
+            try: browserApps[browserApp][3]
+            except IndexError: browserApps[browserApp].append(BooleanVar())
+            browserApps[browserApp][3].set(False)
+            if (browserApp == newDefault): 
+                browserApps[browserApp][3].set(True)
+                defaultBrowser = browserApp
+        print(browserApps[defaultBrowser][0] + ' is now the default browser')
+        ui_update()
 
     lastSelected = ''
     root = Tk()
     root.title("Bowser")
     #root.iconphoto(False, PhotoImage(file='/usr/share/icons/hicolor/256x256/apps/bowser.png'))
 
-    lbSelected = Listbox(root)
-    lbSelected.grid(column=0, row=1, columnspan=2)
-    lbSelected_update()
-    lbSelected.bind("<<ListboxSelect>>", lbSelected_cb)
-    #lbSelected.bind('<B1-Motion>', lbSelected_move) #buggy
+    lbPrefs = Listbox(root)
+    lbPrefs.grid(column=0, row=1, columnspan=2)
+    lbPrefs_update()
+    lbPrefs.bind("<<ListboxSelect>>", lbPrefs_cbSelected)
+    #lbPrefs.bind('<B1-Motion>', lbPrefs_cbMove) #buggy
 
     btnAdd = Button(root, text = "Add Rule", command = btnAdd_cb)  
     btnAdd.grid(column=0, row=0)
@@ -210,25 +254,29 @@ def settings():
     
     values = []
     for browserApp in browserApps: values.append(browserApps[browserApp][0])
-    cbBrowsers = ttk.Combobox(root)
-    cbBrowsers.grid(column=0, row=2, columnspan=2)
-    cbBrowsers['values'] = values
-    cbBrowsers.bind("<<ComboboxSelected>>", cbBrowsers_cb)
+    dbBrowsers = ttk.Combobox(root)
+    dbBrowsers.grid(column=0, row=2, columnspan=2)
+    dbBrowsers['values'] = values
+    dbBrowsers.bind("<<ComboboxSelected>>", dbBrowsers_cbSelected)
 
     menubar = Menu(root)
-    filemenu = Menu(menubar, tearoff=0)
 
+    filemenu = Menu(menubar, tearoff=0)
     filemenu.add_command(label="Export Rules", command = exportConfig)
     filemenu.add_command(label="Import Rules", command = importConfig)
     filemenu.add_separator()
     filemenu.add_command(label="Exit", command = root.quit)
     menubar.add_cascade(label="File", menu = filemenu)
 
+
     settingsmenu = Menu(menubar, tearoff=0)
-    #settingsmenu.add_command(label="Enable Bowser", command = associateMimetypes)
+    browsermenu = Menu(settingsmenu, tearoff=0)
+    settingsmenu.add_cascade(label="Default Web Browser", menu = browsermenu)
+    browsermenu_update() #settingsmenu.bind( '<<MenuSelect>>', browsermenu_update)
     settingsmenu.add_command(label="Enable Bowser and detect installed web browsers", command = setup)
     settingsmenu.add_command(label="Disable Bowser", command = reset)
     menubar.add_cascade(label="Settings", menu = settingsmenu)
+
 
     helpmenu = Menu(menubar, tearoff=0)
     helpmenu.add_command(label="About...", command=openAppWebsite)
@@ -246,4 +294,4 @@ if (URI == '--settings'): settings()
 if (URI == '--reset'): reset(); exit()
 if (URI == '--setup'): setup(); settings();
 openBrowser()
-
+nt(browserApp)

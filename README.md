@@ -25,7 +25,7 @@ All changes are saved as they are made.
 
 Use the File menu to Export or Import your rules configuration from files for backup.
 
-Use the Settings menu to enable/disable Bowser, and to detect installed web browsers.
+Use the Settings menu to enable/disable Bowser, to detect installed web browsers, or to set the default browser for links without rules.
 
 Use the Help menu to find this readme.
 
