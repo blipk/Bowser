@@ -97,7 +97,6 @@ def setup():
                     list(filter(    lambda x: x != "", contents[mimesLoc+9:contents.find("\n", mimesLoc)].split(';') ))
                 ]})
 
-    #currentBrowser = subprocess.check_output(['xdg-mime', 'query', 'default', 'text/html']).decode('utf-8').replace('\n', '');
     currentBrowser = subprocess.check_output(['xdg-settings', 'get', 'default-web-browser']).decode('utf-8').replace('\n', '');
     if not (currentBrowser == 'bowser.desktop'): defaultBrowser = currentBrowser; associateMimetypes();
     if (defaultBrowser == 'bowser.desktop' or defaultBrowser == ''): defaultBrowser = list(browserApps)[0]
@@ -110,15 +109,6 @@ def reset():
     print(defaultBrowser + ' is now the default browser'); 
     messagebox.showinfo(title=None, message="Bowser has been disabled and links will now open with " + browserApps[defaultBrowser][0] + ".")
 def associateMimetypes(browser='bowser.desktop'):
-    '''
-    global browserApps
-    allMimes = []
-    for k in browserApps: allMimes.append(browserApps[k][2])
-    allMimes = list(dict.fromkeys(allMimes[0])) #remove duplicates
-    allMimes = list(filter(lambda x: x != "", allMimes)) #remove empties
-    #for mime in allMimes: os.system('xdg-mime default ' + browser + ' ' + mime) #silent
-    #for mime in allMimes: os.system('gio mime ' + mime + ' ' + browser)
-    '''
     os.system('xdg-settings set default-web-browser ' + browser)
 
 #END SETUP
@@ -164,25 +154,6 @@ def settings():
         except: print('None selected')
         if (lastSelected == ''): return
         dbBrowsers.current(  dbBrowsers['values'].index(browserApps[uriPrefs[lastSelected]][0])   )
-    def lbPrefs_cbMove(event):
-        global lastSelectedIndex, uriPrefs
-        i = lbPrefs.nearest(event.y)
-        if i < lastSelectedIndex:
-            x = lbPrefs.get(i)
-            lbPrefs.delete(i); lbPrefs.insert(i+1, x)
-            lastSelectedIndex = i
-        elif i > lastSelectedIndex:
-            x = lbPrefs.get(i)
-            lbPrefs.delete(i); lbPrefs.insert(i-1, x)
-            lastSelectedIndex = i
-        values = lbPrefs.get(0, END)
-        tmp = {}
-        for value in values:
-            for uriPref in uriPrefs:
-                if (uriPref == value):
-                    tmp.update({uriPref: uriPrefs[uriPref]})
-        uriPrefs = tmp
-        ui_update()
     def dbBrowsers_cbSelected(event):
         global lastSelected
         if (lastSelected == ''): return
@@ -239,13 +210,12 @@ def settings():
     lastSelected = ''
     root = Tk()
     root.title("Bowser")
-    #root.iconphoto(False, PhotoImage(file='/usr/share/icons/hicolor/256x256/apps/bowser.png'))
+    root.iconphoto(False, PhotoImage(file='bowser.png'))
 
     lbPrefs = Listbox(root)
     lbPrefs.grid(column=0, row=1, columnspan=2)
     lbPrefs_update()
     lbPrefs.bind("<<ListboxSelect>>", lbPrefs_cbSelected)
-    #lbPrefs.bind('<B1-Motion>', lbPrefs_cbMove) #buggy
 
     btnAdd = Button(root, text = "Add Rule", command = btnAdd_cb)  
     btnAdd.grid(column=0, row=0)
@@ -294,4 +264,3 @@ if (URI == '--settings'): settings()
 if (URI == '--reset'): reset(); exit()
 if (URI == '--setup'): setup(); settings();
 openBrowser()
-nt(browserApp)
