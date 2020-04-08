@@ -29,6 +29,7 @@ import json
 import tkinter
 import subprocess
 import functools
+import re
 from tkinter import *
 from tkinter import ttk, simpledialog, filedialog, messagebox
 from os import listdir, path
@@ -104,7 +105,8 @@ def setup(init = False):
     currentBrowser = subprocess.check_output(['xdg-settings', 'get', 'default-web-browser']).decode('utf-8').replace('\n', '');
     if (not currentBrowser == 'bowser.desktop' and init == True): defaultBrowser = currentBrowser; setxdgDefaultWebBrowser();
     if (defaultBrowser == 'bowser.desktop' or defaultBrowser == ''): defaultBrowser = list(browserApps)[0]
-    if not bool(uriPrefs): uriPrefs = {'youtube.com': defaultBrowser, 'youtu.be': defaultBrowser}
+    tmp = {'scheme': True, 'authority': True, 'path': True, 'query': True, 'fragment': True}
+    if not bool(uriPrefs): uriPrefs = {'youtube.com': {'defaultBrowser': defaultBrowser, 'uriOptions': tmp}, 'youtu.be': {'defaultBrowser': defaultBrowser, 'uriOptions': tmp}}
     saveConfig()
     print('Setup completed and config saved');
 def setxdgDefaultWebBrowser(browser='bowser.desktop'):
@@ -123,11 +125,30 @@ def enableBowser():
 
 #MAIN
 def openBrowser():
-    for k in config['uriPrefs']:
-        if (URI.find(k) > -1):
-            execCmd = browserApps.get(uriPrefs[k])[1].replace("%u", URI).replace("%U", URI)
-            os.system(execCmd)
-            exit() #if a preference is found, don't continue to opening in default
+    global URI
+    regexPattern = ("^(?P<s1>(?P<s0>[^:/\?#]+):)?(?P<a1>" 
+                    "//(?P<a0>[^/\?#]*))?(?P<p0>[^\?#]*)" 
+                    "(?P<q1>\?(?P<q0>[^#]*))?" 
+                    "(?P<f1>#(?P<f0>.*))?")
+    regex = re.compile(regexPattern)
+    output = regex.match(URI)
+    
+    if (output.group('a1') == None):     #Regex isn't perfect if there's no scheme
+        URI = 'https://' + URI
+        output = regex.match(URI)
+
+    splitURI = {'scheme': output.group('s1'), 'authority': output.group('a0'), 'path': output.group('p0'), 'query': output.group('q1'), 'fragment': output.group('f1')}
+
+
+    matchFound = False
+    for pref in config['uriPrefs']:
+        for x in config['uriPrefs'][pref]['uriOptions']:
+            if (config['uriPrefs'][pref]['uriOptions'][x] == False): continue;
+            if (str(splitURI[x]).find(pref) > -1):
+                matchFound = True
+                execCmd = browserApps.get(uriPrefs[pref]['defaultBrowser'])[1].replace("%u", URI).replace("%U", URI)
+                os.system(execCmd)
+    if (matchFound): exit()
     execCmd = browserApps.get(defaultBrowser)[1].replace("%u", URI).replace("%U", URI)
     os.system(execCmd);
 
@@ -135,6 +156,42 @@ def openBrowser():
 lastSelected = ''
 lastSelectedIndex = 0
 def settings():
+    class AddDialog(simpledialog.Dialog):
+        def body(self, master):
+            self.iconphoto(False, PhotoImage(file='/home/kronosoul/.config/bowser/bowser.png'))
+            Label(master, text="Text to search for:   ").grid(row=0, column=0, columnspan=1, sticky=E)
+            self.input = Entry(master)
+            self.input.grid(row=0, column=1, columnspan=5, sticky=W+E+N+S)
+            Label(master, text="Parts of the link to search in:").grid(row=2, column=0, columnspan=5, sticky=W)
+            Label(master, text="http://", fg="green").grid(row=3, column=0, sticky=E)
+            Label(master, text="example.com:8023").grid(row=3, column=1, sticky=W)
+            Label(master, text="/directions/here", fg="green").grid(row=3, column=2, sticky=W)
+            Label(master, text="?name=value").grid(row=3, column=3, sticky=W)
+            Label(master, text="#bookmark", fg="green").grid(row=3, column=4, sticky=W)
+            
+            def checkAll():
+                for v in self.uriParts_cbs: self.uriParts_cbs[v].var.set(True)
+            self.all = Button(master, text="All", command=checkAll)
+            self.all.grid(row=4, column=0, sticky=W)
+            self.uriParts = {'scheme': False, 'authority': False, 'path': False, 'query': False, 'fragment': False}
+            self.uriParts_cbs = dict()
+            for checkbox in self.uriParts:
+                self.uriParts_cbs[checkbox] = Checkbutton(master, text="", onvalue=True, offvalue=False);
+                self.uriParts_cbs[checkbox].var = BooleanVar(); self.uriParts_cbs[checkbox].var.set(True)
+                self.uriParts_cbs[checkbox]['variable'] = self.uriParts_cbs[checkbox].var
+            self.uriParts_cbs['scheme'].grid(row=4, column=0, sticky=E)
+            self.uriParts_cbs['authority'].grid(row=4, column=1)
+            self.uriParts_cbs['path'].grid(row=4, column=2)
+            self.uriParts_cbs['query'].grid(row=4, column=3)
+            self.uriParts_cbs['fragment'].grid(row=4, column=4  )
+
+            return self.input #initial focus
+        def apply(self):
+            name = self.input.get()
+            for option in self.uriParts:
+                self.uriParts[option] = self.uriParts_cbs[option].var.get();
+            self.result = {'name': name, 'uriOptions': self.uriParts}
+
     global config, browserApps, defaultBrowser, uriPrefs
     def ui_update():
         lbPrefs_update()
@@ -161,14 +218,15 @@ def settings():
         try: lastSelected = lbPrefs.get(lbPrefs.curselection()); lastSelectedIndex = lbPrefs.nearest(event.y)
         except: print('None selected')
         if (lastSelected == ''): return
-        dbBrowsers.current(  dbBrowsers['values'].index(browserApps[uriPrefs[lastSelected]][0])   )
+        b = uriPrefs[lastSelected]['defaultBrowser']
+        dbBrowsers.current(  dbBrowsers['values'].index(browserApps[b][0])   )
     def dbBrowsers_cbSelected(event):
         global lastSelected
         if (lastSelected == ''): return
         selectedApp = ''
         for browserApp in browserApps:
             if(browserApps[browserApp][0] == dbBrowsers['values'][dbBrowsers.current()]): selectedApp = browserApp
-        uriPrefs[lastSelected] = selectedApp
+        uriPrefs[lastSelected]['defaultBrowser'] = selectedApp
         ui_update()
     def btnDelete_cb():
         global lastSelected
@@ -178,8 +236,10 @@ def settings():
         ui_update()
     def btnAdd_cb():
         out = ''
-        out = simpledialog.askstring("New Rule", "Text/Domain to search for in URI passed to web browser:")
-        uriPrefs.update({out: defaultBrowser})
+        addDialog = AddDialog(root, "New Rule")
+        if (addDialog.result == None or not bool(addDialog.result['uriOptions']) or addDialog.result['name'] == None or addDialog.result['name'] == ''): return;
+        out = {addDialog.result['name']: {'defaultBrowser': defaultBrowser, 'uriOptions': addDialog.result['uriOptions']}}
+        uriPrefs.update(out)
         ui_update()
     def importConfig():
         print('Importing Config')

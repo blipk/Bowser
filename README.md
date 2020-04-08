@@ -11,25 +11,23 @@ Run Bowser with python3 to install:
 
 ### General Usage
 
-Open Bowser from your desktop environments application menu to change the rules, or see the CLI options below.
+Open Bowser from your desktop environments application menu to change the rules. Use the Help menu to find this readme.
 
 ![Bowser Settings GUI](BowserGUI.png?raw=true "Screenshot of Bowser Settings GUI")
 
 Select a rule and the web browser it opens with will show in the drop down box.
 
-Choose another browser to make it the default for the selected rule.
+Choose another browser to make it the default for the selected rule. All changes are saved as they are made.
 
-Use the buttons to create and delete rules.
+Use the Add button to add a rule, the Delete button to delete the selected rule.
 
-All changes are saved as they are made.
+![Bowser Add Rule Dialog](BowserAddRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
 
-Use the File menu to Export or Import your rules configuration from files for backup.
+Enter the text to search for and select which parts of the URL you would like for it to be searched in, default is the whole URL.
+
+Use the File menu to Export or Import your rules and configuration from files for backup.
 
 Use the Settings menu to enable/disable Bowser, to detect installed web browsers, or to set the default browser for links without rules.
-
-Use the Help menu to find this readme.
-
-
 
 ### CLI Usage
 Open the Bowser rules settings window:
