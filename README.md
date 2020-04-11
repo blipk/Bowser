@@ -2,7 +2,7 @@
 
 Acts as the default web browser and allows you to set up rules to open specific URLs in specific web browsers.
 
-### Installation
+## Installation
 
 Run Bowser with python3 or bash to install:
 
@@ -11,7 +11,7 @@ Run Bowser with python3 or bash to install:
  ```python3 bowser.py```  
 
 
-### General Usage
+## General Usage
 
 Open Bowser from your desktop environments application menu, here you can create and manage rules.<br/>
 
@@ -31,19 +31,19 @@ All changes are saved as they are made.<br/>
 
 ![Bowser Add Rule Dialog](doc/BowserAddRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
 
-Enter the text to search for and which parts of the URL you would like for it to be searched in.
+   Enter the text to search for and which parts of the URL you would like for it to be searched in.
 
 #### Enable 'Always Ask' under Default Web Browser
 
 ![Bowser Ask Rule Dialog](doc/BowserAskRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
 
-A popup with a list of your web browsers will show when opening a link without a rule.
+   A popup with a list of your web browsers will show when opening a link without a rule.
 
-A rule will be created for that domain for the web browser you select. Select other parts of the URL to include them as well as the domain.
+   A rule will be created for that domain for the web browser you select. Select other parts of the URL to include them as well as the domain.
 
-Press the Bowser icon to open settings. Press cancel to close and do nothing.
+   Press the Bowser icon to open settings. Press cancel to close and do nothing.
 
-### CLI Usage
+## CLI Usage
 Open the Bowser rules settings window:
 
  ```python3 ~/.config/bowser/bowser.py``` OR
@@ -62,7 +62,7 @@ Enable Bowser and sets rules to active:
 
  ```python3 ~/.config/bowser/bowser.py --enable```
 
-### Support
+## Support
 
 This should work in most linux desktop environments.
 
@@ -72,7 +72,7 @@ sudo apt install python3 python3-tk
 sudo yum install python3 python3-tkinter
 ```
 
-### Licence
+##   Licence
 
 ```
 This file is part of the Bowser linux application
