@@ -4,7 +4,7 @@ Acts as the default web browser and allows you to set up rules to open specific 
 
 ### Installation
 
-Run Bowser with python3 or bash to install:
+Run Bowser with python3 OR bash to install:
 
  ```python3 bowser.py```
 
@@ -24,13 +24,13 @@ Use the File menu to export or import your rules and configuration from files fo
 
 Select a rule and the web browser it opens with will show in the drop down box.<br/>
 Choose another web browser to make it the default for the selected rule.<br/>
-Double click a rule to edit it. Use the Delete button to delete the selected rule<br/>
+Double click a rule to edit it. Use the Delete Rule button to delete the selected rule.<br/>
 All changes are saved as they are made.<br/>
 
 
 ![Bowser Add Rule Dialog](doc/BowserAddRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
 
-Use New Rule to create a rule, enter the text to search for and select which parts of the URL you would like for it to be searched in.
+Use New Rule to make a rule, enter the text to search for and select which parts of the URL you would like for it to be searched in.
 
 
 ![Bowser Ask Rule Dialog](doc/BowserAskRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
