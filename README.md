@@ -13,40 +13,34 @@ Run Bowser with python3 or bash to install:
 
 ### General Usage
 
-Open Bowser from your desktop environments application menu, here you can create and manage rules.
-
-Use the Settings menu to:
-- Enable or disable Bowser
-- Scan and detect installed web browsers
-- To set the default browser for links without rules
-
-Use the File menu to Export or Import your rules and configuration from files for backup. Use the Help menu to find this readme.
+Open Bowser from your desktop environments application menu, here you can create and manage rules.<br/>
+Use the Settings menu to: Enable/disable Bowser, set the default browser for links without rules or scan for installed web browsers<br/>
+Use the File menu to Export or Import your rules and configuration from files for backup. Use the Help menu to find this readme.<br/>
 
 
 ![Bowser Settings GUI](doc/BowserGUI.png?raw=true "Screenshot of Bowser Settings GUI")
 
-```
-Select a rule and the web browser it opens with will show in the drop down box.
-Choose another browser to make it the default for the selected rule. 
-Double click a rule to edit it.
-All changes are saved as they are made.
-```
+
+Select a rule and the web browser it opens with will show in the drop down box.<br/>
+Choose another browser to make it the default for the selected rule.<br/>
+Double click a rule to edit it.<br/>
+All changes are saved as they are made.<br/>
+
 
 ![Bowser Add Rule Dialog](doc/BowserAddRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
 
-```
+
 Use New Rule to create a rule, use the Delete button to delete the selected rule.
 
 Enter the text to search for and select which parts of the URL you would like for it to be searched in, default is the whole URL.
-```
+
 
 ![Bowser Ask Rule Dialog](doc/BowserAskRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
 
-```
+
 If you set the default browser to 'Always ask' a popup with a list of browsers will show when opening a link without a rule.
 
 A rule will be created for that domain for the browser you select. Select other parts of the URL to include them as well as the domain.
-```
 
 ### CLI Usage
 Open the Bowser rules settings window:
