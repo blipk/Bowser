@@ -122,12 +122,15 @@ class tkUnmatchedURIDialog(tk.Frame):
         for element in splitURI:
             if ((element.find('NoTrim') > -1 and element != 'authorityNoTrim') or element == 'scheme' or element == 'authority' or splitURI[element] == None or splitURI[element] == ''): continue
             if (i > 0): state = 'disabled'
-            maxLength = 99999999999 #TO DO fix the pass back to the pref before truncating
+            maxLength = 7
             if (i == 0): maxLength = 40
             if (i == 1): maxLength = 15
-            
+            self.urlLabels.append(tk.Label(master, bd = 0, padx = 0, fg = 'green', disabledforeground = 'red', state = state))
+            self.urlLabels[i].fullText = splitURI[element]
+            self.urlLabels[i].elementName = element
             labelText = (splitURI[element][:maxLength] + '..') if len(splitURI[element]) > maxLength else splitURI[element]
-            self.urlLabels.append(tk.Label(master, text=labelText, bd = 0, padx = 0, fg = 'green', disabledforeground = 'red', state = state))
+            self.urlLabels[i].config(text = labelText)
+
             self.urlLabels[i].grid(row=0, column=i, sticky=stick)
             self.urlLabels[i].bind("<Button-1>", functools.partial(self.togglePref, i))
             stick = tk.W 
@@ -225,14 +228,18 @@ class tkUnmatchedURIDialog(tk.Frame):
     def addPrefAndOpen(self, browserApp):
         outURI = ''
         first = True
+
+        uriOptions = {'scheme': False, 'authority': False, 'path': False, 'query': False, 'fragment': False}
+
         for label in self.urlLabels:
-            if (label.cget('state') != 'disabled'): outURI += label.cget('text')
+            if (label.cget('state') != 'disabled'): 
+                outURI += label.fullText
+                uriOptions[label.elementName.replace("NoTrim", "")] = True
             if (first):     #Drop the www. in the domain for the pref
                 if (outURI[:4] == 'www.'): outURI = outURI[4:]
                 first = False
 
-        out = {outURI: {'defaultBrowser': browserApp,
-                        'uriOptions': {'scheme': True, 'authority': True, 'path': True, 'query': True, 'fragment': True}}}
+        out = {outURI: {'defaultBrowser': browserApp, 'uriOptions': uriOptions}}
 
         bowser.uriPrefs.update(out)
         bowser.saveConfig()

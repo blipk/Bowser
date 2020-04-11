@@ -56,7 +56,7 @@ def isRunning(count = 0):
     if len(my_pid.splitlines()) > count: return True
     else: return False
 def passURI():
-    if (bowser.URI.find('--settings') > -1): return
+    if (bowser.URI == '--settings' or bowser.URI == '--setup' or bowser.URI == '' or bowser.URI == None): return
     with open(uriFile, 'a+') as file: file.write(bowser.URI+"\r\n"); file.close()
 def checkURI():
     bowser.bowserSettings.root.after(1000, checkURI)
