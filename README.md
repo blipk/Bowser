@@ -6,9 +6,9 @@ Acts as the default web browser and allows you to set up rules to open specific 
 
 Run Bowser with python3 or bash to install:
 
- ```python3 bowser.py``` OR
+ ```./bowser.py``` OR
 
- ```./bowser.py```
+ ```python3 bowser.py```  
 
 
 ### General Usage
