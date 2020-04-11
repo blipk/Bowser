@@ -15,7 +15,7 @@ Run Bowser with python3 or bash to install:
 
 Open Bowser from your desktop environments application menu, here you can create and manage rules.<br/>
 
-Use the Settings menu to: enable/disable Bowser, set the default web browser for links without rules or rescan for installed web browsers.<br/>
+Use the Settings menu to: enable/disable Bowser, set the default web browser for links without rules, or rescan for installed web browsers.<br/>
 
 Use the File menu to export or import your rules and configuration from files for backup. Use the Help menu to find this readme.<br/>
 
@@ -30,7 +30,7 @@ All changes are saved as they are made.<br/>
 
 ![Bowser Add Rule Dialog](doc/BowserAddRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
 
-Use New Rule to create a rule, enter the text to search for and select which parts of the URL you would like for it to be searched in, default is the whole URL.
+Use New Rule to create a rule, enter the text to search for and select which parts of the URL you would like for it to be searched in.
 
 
 ![Bowser Ask Rule Dialog](doc/BowserAskRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
