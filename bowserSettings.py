@@ -27,6 +27,7 @@ import functools
 import json
 import tkinter as tk
 from tkinter import ttk, simpledialog, commondialog, filedialog, messagebox
+from os import path
 import bowserGlobals as bowser
 
 #CLASSES
@@ -47,25 +48,38 @@ class tkAddEditDialog(simpledialog.Dialog):
             self.input.insert(0, prefName)
         self.input.grid(row=0, column=1, columnspan=5, sticky=tk.W+tk.E+tk.N+tk.S)
         tk.Label(selfFrame, text="In these sections:").grid(row=2, column=0, columnspan=5, sticky=tk.W)
-        tk.Label(selfFrame, text="http://", bd = 0, padx = 0, anchor=tk.E, fg="green").grid(row=3, column=0, sticky=tk.E)
-        tk.Label(selfFrame, text="example.com:8023", bd = 0, padx = 0, anchor=tk.W).grid(row=3, column=1, sticky=tk.W)
-        tk.Label(selfFrame, text="/directions/here", bd = 0, padx = 0, fg="green", anchor=tk.W).grid(row=3, column=2, sticky=tk.W)
-        tk.Label(selfFrame, text="?name=value", bd = 0, padx = 0, anchor=tk.W).grid(row=3, column=3, sticky=tk.W)
-        tk.Label(selfFrame, text="#bookmark", bd = 0, padx = 0, anchor=tk.W, fg="green").grid(row=3, column=4, sticky=tk.W)
         
+
+        if (bool(self.pref)): self.uriParts = self.pref[prefName]['uriOptions']
+        else: self.uriParts = {'scheme': False, 'authority': True, 'path': True, 'query': False, 'fragment': False}
+        splitURI = bowser.splitURI("http://xample.com:8023/directions/here?name=value#bookmark")
+        self.uriParts_cbs = dict()
+        self.urlLabels = list()
+
+        i = 0
+        stick = tk.E
+        state = 'disabled'
+        for element in splitURI:
+            if ((element.find('NoTrim') > -1) or splitURI[element] == None or splitURI[element] == ''): continue
+            if (self.uriParts[element]): state = 'normal'
+            self.urlLabels.append(tk.Label(selfFrame, text=splitURI[element], bd = 0, padx = 0, fg = 'green', disabledforeground = 'red', state = state))
+            self.urlLabels[i].grid(row=3, column=i, sticky=stick)
+            self.urlLabels[i].bind("<Button-1>", functools.partial(self.toggleURIOptions, i))
+            stick = tk.W 
+            state = 'disabled'
+            i += 1
         def checkAll():
             for v in self.uriParts_cbs: self.uriParts_cbs[v].var.set(True)
+            self.updateURILabels();
         self.all = tk.Button(selfFrame, text="All", command=checkAll)
         self.all.grid(row=4, column=0, sticky=tk.W)
-        if (bool(self.pref)):
-            self.uriParts = self.pref[prefName]['uriOptions']
-        else:
-            self.uriParts = {'scheme': False, 'authority': True, 'path': True, 'query': False, 'fragment': False}
-        self.uriParts_cbs = dict()
+
+        i = 0
         for checkbox in self.uriParts:
-            self.uriParts_cbs[checkbox] = tk.Checkbutton(selfFrame, text="", onvalue=True, offvalue=False);
+            self.uriParts_cbs[checkbox] = tk.Checkbutton(selfFrame, text="", onvalue=True, offvalue=False, command=functools.partial(self.updateURILabels, i));
             self.uriParts_cbs[checkbox].var = tk.BooleanVar(); self.uriParts_cbs[checkbox].var.set(self.uriParts[checkbox])
             self.uriParts_cbs[checkbox]['variable'] = self.uriParts_cbs[checkbox].var
+            i += 1
         self.uriParts_cbs['scheme'].grid(row=4, column=0, sticky=tk.E)
         self.uriParts_cbs['authority'].grid(row=4, column=1)
         self.uriParts_cbs['path'].grid(row=4, column=2)
@@ -78,7 +92,22 @@ class tkAddEditDialog(simpledialog.Dialog):
         for option in self.uriParts:
             self.uriParts[option] = self.uriParts_cbs[option].var.get();
         self.result = {'name': name, 'uriOptions': self.uriParts}
-        
+    def updateURILabels(self, event = None):
+        i = 0
+        for label in self.urlLabels:
+            if (self.uriParts_cbs[list(self.uriParts)[i]].var.get()):
+                self.urlLabels[i].config(state = 'normal')
+            else: self.urlLabels[i].config(state = 'disabled')
+            i += 1
+    def toggleURIOptions(self, i = 0, event = None):
+        print(self.uriParts_cbs[list(self.uriParts)[i]], list(self.uriParts)[i])
+        if (event.widget.cget('state') == 'normal'): 
+            event.widget.config(state = 'disabled')
+            self.uriParts_cbs[list(self.uriParts)[i]].var.set(False)
+        else: 
+            event.widget.config(state = 'normal')
+            self.uriParts_cbs[list(self.uriParts)[i]].var.set(True)
+
 class tkUnmatchedURIDialog(tk.Frame):
     def __init__(self, master, *args, **kwargs):
         tk.Frame.__init__(self, master, *args, **kwargs)
@@ -104,37 +133,54 @@ class tkUnmatchedURIDialog(tk.Frame):
             stick = tk.W 
             i += 1
 
-        if (i == 1): self.urlLabels[0].grid(row=0, column=0, sticky=tk.W+tk.E+tk.N+tk.S) #Centre if only domain
-
+        if (i == 1): 
+            #self.urlLabels[0].grid(row=0, column=0, sticky=tk.W+tk.E+tk.N+tk.S) #Centre if only domain
+            tk.Label(master, text="", bd = 0, padx = 0, state = 'disabled').grid(row=0, column=1); i+=1 #padding for formatting
+            
         self.i = 0
         self.images = list()
         self.browserButtons = list()
         for browserApp in bowser.browserApps: 
-            appIcon = '/usr/share/icons/hicolor/256x256/apps/' + bowser.browserApps[browserApp][3] + '.png'
-
-            img = tk.PhotoImage(file=appIcon)
-            img = img.subsample(5)
-            
-            self.images.append(img)
             self.browserButtons.append(tk.Button(master, text = bowser.browserApps[browserApp][0]))
-            self.browserButtons[self.i].config(image = self.images[self.i], compound="left", anchor=tk.W, 
-                                            borderwidth = 0,
-                                                command = functools.partial(self.addPrefAndOpen, browserApp))
+            self.browserButtons[self.i].config(compound="left", anchor=tk.W, borderwidth = 0, command = functools.partial(self.addPrefAndOpen, browserApp))
+            appIcon = '/usr/share/icons/hicolor/256x256/apps/' + bowser.browserApps[browserApp][3] + '.png'
+            if (path.exists(appIcon)):
+                img = tk.PhotoImage(file=appIcon).subsample(5)
+                self.images.append(img)
+                self.browserButtons[self.i].config(image = self.images[self.i])
+            else: self.images.append(0)
             self.browserButtons[self.i].grid(row=self.i+1, column=0, sticky=tk.W+tk.E, columnspan=i)
             self.browserButtons[self.i].grid_columnconfigure(0, weight=1)
             self.browserButtons[self.i].grid_rowconfigure(0, weight=1)
             self.i += 1
-        self.btnQuit = tk.Button(master, text = "Cancel", command = self.cancel, borderwidth = 0)  
-        self.btnQuit.grid(column=0, row=self.i+1, columnspan=i, sticky=tk.W+tk.E)
+            
+        
+        #span = (i + 2 // 2) // 2
+        self.settingsImage = tk.PhotoImage(file=bowser.homePath+'/.config/bowser/bowser.png').subsample(8)
+        self.btnSettings = tk.Button(master, image = self.settingsImage, command = self.openSettings, borderwidth = 0, anchor = tk.CENTER, padx = 50, width = 70)  
+        self.btnSettings.grid(column=0, row=self.i+1, columnspan=1, sticky=tk.W)
+        self.btnQuit = tk.Button(master, text = "Cancel", command = self.cancel, borderwidth = 0, anchor = tk.CENTER)
+        self.btnQuit.grid(column=i-1, row=self.i+1, columnspan=i-1, sticky=tk.W+tk.E+tk.N+tk.S)
+        
 
-    def togglePref(self, i, event = None):
+    def openSettings(self):
+        global slave, root, settingsApp, unmatchedApp
+        if (settingsApp == None): #Rebuild
+            root.attributes('-type', 'normal')
+            root.attributes('-alpha', '1.0')
+            root.attributes("-topmost", 1)
+            for rootWidget in root.grid_slaves(): rootWidget.grid_forget()
+            unmatchedApp = None
+            settingsApp = tkBowserSettings(root)
+            settingsApp.grid()
+        else: self.cancel()
+    def togglePref(self, i = 0, event = None):
         if (self.urlLabels[i].cget('state') == 'normal'): 
             allowed = True
             try:
                 if(self.urlLabels[i+1].cget('state') == 'normal' and self.urlLabels[i-1].cget('state') == 'normal'):
                      allowed = False
-            except:
-                allowed = True
+            except: allowed = True
 
             states = list() #Never allow if only one is on
             for x in self.urlLabels: 
@@ -143,16 +189,23 @@ class tkUnmatchedURIDialog(tk.Frame):
                 
             if (states.count(True) <= 1): allowed = False
             if all(states): 
-                if (i == 2): self.urlLabels[i+1].config(state = 'disabled')
-                if (i == 1): self.urlLabels[i-1].config(state = 'disabled')
-                allowed = True
-            
+                if (i == 2): 
+                    try: self.urlLabels[i+1].config(state = 'disabled')
+                    except: pass
+                if (i == 1): 
+                    try: 
+                        self.urlLabels[i+1].cget('state')   # Exception won't go to next line if doesn't exist
+                        self.urlLabels[i-1].config(state = 'disabled')
+                    except: pass
+                        
+                if (len(states) > 1): allowed = True
+
             if (allowed): self.urlLabels[i].config(state = 'disabled')
         else:
             allowed = True
             try:
                 if(self.urlLabels[i+1].cget('state') == 'disabled' and self.urlLabels[i-1].cget('state') == 'disabled'):
-                     allowed = False
+                    allowed = False
             except:
                 if (i+1 == len(self.urlLabels) and (self.urlLabels[i-1].cget('state') == 'disabled')): 
                     allowed = False
@@ -167,17 +220,14 @@ class tkUnmatchedURIDialog(tk.Frame):
         bowser.openAskBrowser = False
         bowser.URI = ''
         self.master.destroy()
-
     def addPrefAndOpen(self, browserApp):
         outURI = ''
         first = True
         for label in self.urlLabels:
-            if (label.cget('state') != 'disabled'):
-                outURI += label.cget('text')
+            if (label.cget('state') != 'disabled'): outURI += label.cget('text')
             if (first):     #Drop the www. in the domain for the pref
                 if (outURI[:4] == 'www.'): outURI = outURI[4:]
                 first = False
-        
 
         out = {outURI: {'defaultBrowser': browserApp,
                         'uriOptions': {'scheme': True, 'authority': True, 'path': True, 'query': True, 'fragment': True}}}
@@ -198,23 +248,26 @@ class tkBowserSettings(tk.Frame):
         self.lastSelected = ''
         self.lastSelectedIndex = 0
 
-        self.lbPrefs = tk.Listbox(self)
-        self.lbPrefs.grid(column=0, row=1, columnspan=2)
+        self.btnNewRule = tk.Button(self, text = "New Rule", command = self.btnNewRule_cb, bd = 0)  
+        self.btnNewRule.grid(column=0, row=0)
+        self.btnDeleteRule = tk.Button(self, text = "Delete Rule", command = self.btnDeleteRule_cb, bd = 0)  
+        self.btnDeleteRule.grid(column=1, row=0)
+        
+        self.lbPrefs = tk.Listbox(self, borderwidth = 0)
+        self.lbPrefs.grid(column=0, row=1, columnspan=2, sticky = tk.W+tk.E+tk.N+tk.S)
         self.lbPrefs_update()
         self.lbPrefs.bind("<<ListboxSelect>>", self.lbPrefs_cbSelected)
         self.lbPrefs.bind("<Double-Button-1>", self.editRule_cb)
-
-        self.btnNewRule = tk.Button(self, text = "New Rule", command = self.btnNewRule_cb)  
-        self.btnNewRule.grid(column=0, row=0)
-        self.btnDeleteRule = tk.Button(self, text = "Delete Rule", command = self.btnDeleteRule_cb)  
-        self.btnDeleteRule.grid(column=1, row=0)
         
-        self.dbBrowsers = ttk.Combobox(self)
-        self.dbBrowsers.grid(column=0, row=2, columnspan=2)    
+        self.dbBrowsers = ttk.Combobox(self, state="readonly", justify = tk.CENTER)
+        self.dbBrowsers.grid(column=0, row=2, columnspan=2, sticky = tk.W+tk.E+tk.N+tk.S)    
         self.dbBrowsers.bind("<<ComboboxSelected>>", self.dbBrowsers_cbSelected)
         self.values = []
         for browserApp in bowser.browserApps: self.values.append(bowser.browserApps[browserApp][0])
         self.dbBrowsers['values'] = self.values
+
+        style = ttk.Style()
+        style.map('TCombobox', fieldbackground=[('readonly', 'white')], borderwidth=[('readonly', '0')], arrowsize=[('readonly', '0')])
 
         self.menubar = tk.Menu(self)
 
@@ -222,7 +275,7 @@ class tkBowserSettings(tk.Frame):
         self.filemenu.add_command(label="Export Rules", command = self.exportConfig)
         self.filemenu.add_command(label="Import Rules", command = self.importConfig)
         self.filemenu.add_separator()
-        self.filemenu.add_command(label="Exit", command = master.quit)
+        self.filemenu.add_command(label="Exit", command = root.quit)
         self.menubar.add_cascade(label="File", menu = self.filemenu)
 
         self.settingsmenu = tk.Menu(self.menubar, tearoff=0)
@@ -290,6 +343,10 @@ class tkBowserSettings(tk.Frame):
         try: bowser.uriPrefs[self.lastSelected]['defaultBrowser'] = selectedApp
         except KeyError: print('KeyError: List may not have updated to another selected item since deleting an item'); return;
         self.ui_update(self)
+        
+        self.lbPrefs.select_set(self.lbPrefs.get(0, tk.END).index(self.lastSelected))
+        self.lbPrefs.activate(self.lbPrefs.get(0, tk.END).index(self.lastSelected))
+        self.lbPrefs.focus_set()
     def btnDeleteRule_cb(self):
         try: del bowser.uriPrefs[self.lbPrefs.get(self.lbPrefs.curselection())]
         except: print('None selected to delete'); return
@@ -373,24 +430,29 @@ def openUnmatchedURIDialog():
     if (settingsApp != None):
         slave = tk.Toplevel(root)
         slave.attributes('-type', 'splash')
-        slave.attributes('-alpha', '0.7')
+        slave.attributes('-alpha', '0.9')
         slave.attributes("-topmost", 1)
         #slave.attributes('-alpha', '0.7')
         slave.title('Bowser')
         slave.grid()
         unmatchedApp = tkUnmatchedURIDialog(slave)
     else:
+        root.iconphoto(False, tk.PhotoImage(file=bowser.homePath+'/.config/bowser/bowser.png'))
+        root.resizable(width=False, height=False)
+        root.title('Bowser')
         root.attributes('-type', 'splash')
         root.attributes('-alpha', '0.9')
         root.attributes("-topmost", 1)
         unmatchedApp = tkUnmatchedURIDialog(root)
         unmatchedApp.grid()
+        root.iconify()
         root.mainloop()
 
 
 def start():
     global root, settingsApp, unmatchedApp
     root.iconphoto(False, tk.PhotoImage(file=bowser.homePath+'/.config/bowser/bowser.png'))
+    root.resizable(width=False, height=False)
     root.title('Bowser')
     settingsApp = tkBowserSettings(root)
     settingsApp.grid()

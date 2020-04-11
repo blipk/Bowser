@@ -39,6 +39,8 @@ If you enable 'Always ask' under the defaul browser menu, a popup with a list of
 
 A rule will be created for that domain for the browser you select. Select other parts of the URL to include them as well as the domain.
 
+Press the Bowser icon to open settings. Press cancel to close and do nothing.
+
 ### CLI Usage
 Open the Bowser rules settings window:
 

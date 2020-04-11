@@ -61,7 +61,7 @@ def passURI():
 def checkURI():
     bowser.bowserSettings.root.after(1000, checkURI)
     if (not os.path.isfile(uriFile)):  return
-    print('found uri file')
+    print('Found URI file')
     with open(uriFile, 'r') as file: bowser.URI = file.read(); file.close()
     os.remove(uriFile)
     bowser.openBrowser()
@@ -136,8 +136,7 @@ def setup(init = False):
     if (init): bowser.askOnUnmatchedURI = True
     if (init and not currentBrowser.find('bowser.desktop') > -1): setxdgDefaultWebBrowser();
     if (bowser.defaultBrowser.find('bowser.desktop') > -1 or bowser.defaultBrowser == ''):  bowser.defaultBrowser = list(bowser.browserApps)[0]
-    tmp = {'scheme': True, 'authority': True, 'path': True, 'query': True, 'fragment': True}
-    
+    tmp = {'scheme': False, 'authority': True, 'path': False, 'query': False, 'fragment': False}
     if not bool(bowser.uriPrefs): bowser.uriPrefs = {'youtube.com': {'defaultBrowser': bowser.defaultBrowser, 'uriOptions': tmp}, 'youtu.be': {'defaultBrowser': bowser.defaultBrowser, 'uriOptions': tmp}}
     saveConfig()
     print('Setup completed and config saved');
