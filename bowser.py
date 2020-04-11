@@ -57,20 +57,28 @@ def isRunning(count = 0):
     else: return False
 def passURI():
     if (bowser.URI.find('--settings') > -1): return
-    with open(uriFile, 'w+') as file: file.write(bowser.URI); file.close()
+    with open(uriFile, 'a+') as file: file.write(bowser.URI+"\r\n"); file.close()
 def checkURI():
     bowser.bowserSettings.root.after(1000, checkURI)
+
+    if (bowser.bowserSettings.unmatchedApp != None): return  
     if (not os.path.isfile(uriFile)):  return
-    print('Found URI file')
-    with open(uriFile, 'r') as file: bowser.URI = file.read(); file.close()
-    os.remove(uriFile)
-    bowser.openBrowser()
-if (isRunning(2)): #Shouldn't be more than 2 instances running
-    print('To do')#TO DO kill the others, application logic SHOULD prevent this from happening for now
     
+    lines = list()
+    head = tail = None
+    with open(uriFile, 'r') as file: 
+        head = file.read().split('\n', 1)
+        lines = file.read().splitlines(True)
+        try: bool(head[1])
+        except IndexError: head.append('') 
+        bowser.URI = head[0]; 
+        file.close()
+    with open(uriFile, 'w') as file: file.write(head[1]); file.close()
+    if (bowser.URI != ''): bowser.openBrowser()
+if (isRunning(2)): #Shouldn't be more than 2 instances running
+    #TO DO kill the others, application logic SHOULD prevent this from happening
+    print('Error: there should not be more than two instances of bowser running, please kill all bowser python processes')
 if (isRunning(1)):
-    #TO DO check which dialog is open and open settings if its the unmatched one and we want settings
-    #or create a log of URIs in passURI() to be opened as sequential dialogs
     passURI()
     exit()
 
@@ -170,14 +178,17 @@ def openBrowser(overrideBrowser = False):
                 execCmd = bowser.browserApps.get(bowser.uriPrefs[pref]['defaultBrowser'])[1].replace("%u", "").replace("%U", "").strip()
                 process = subprocess.Popen([execCmd, bowser.URI], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     
-    if (matchFound and bowser.bowserSettings == None): exit()
-    
+
+    bowser.bowserSettings.root.lift();
+
     if (bowser.askOnUnmatchedURI and not matchFound):
         bowser.bowserSettings.openUnmatchedURIDialog()
     elif (not matchFound):
         execCmd = bowser.browserApps.get(bowser.uriPrefs[pref]['defaultBrowser'])[1].replace("%u", "").replace("%U", "").strip()
         process = subprocess.Popen([execCmd, bowser.URI], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if (bowser.bowserSettings == None): exit()
+        if (bowser.bowserSettings == None):
+            if (bowser.bowserSettings.settingsApp != None): bowser.bowserSettings.root.lift()
+            exit()
 
 #MAIN
 if not (path.exists(configFile)): setup()

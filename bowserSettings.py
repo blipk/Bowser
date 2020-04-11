@@ -52,7 +52,7 @@ class tkAddEditDialog(simpledialog.Dialog):
 
         if (bool(self.pref)): self.uriParts = self.pref[prefName]['uriOptions']
         else: self.uriParts = {'scheme': False, 'authority': True, 'path': True, 'query': False, 'fragment': False}
-        splitURI = bowser.splitURI("http://xample.com:8023/directions/here?name=value#bookmark")
+        splitURI = bowser.splitURI("http://example.com:8023/directions/here?name=value#bookmark")
         self.uriParts_cbs = dict()
         self.urlLabels = list()
 
@@ -217,8 +217,10 @@ class tkUnmatchedURIDialog(tk.Frame):
             if not any(states): allowed = True
             if (allowed): self.urlLabels[i].config(state = 'normal')
     def cancel(self):
+        global unmatchedApp
         bowser.openAskBrowser = False
         bowser.URI = ''
+        unmatchedApp = None
         self.master.destroy()
     def addPrefAndOpen(self, browserApp):
         outURI = ''
@@ -237,7 +239,6 @@ class tkUnmatchedURIDialog(tk.Frame):
         bowser.openAskBrowser = False
         bowser.openBrowser()
         if (settingsApp != None): settingsApp.ui_update()
-        #TO DO check URI backlog and reopen next one
         self.cancel()
 
 class tkBowserSettings(tk.Frame):   
@@ -272,8 +273,8 @@ class tkBowserSettings(tk.Frame):
         self.menubar = tk.Menu(self)
 
         self.filemenu = tk.Menu(self.menubar, tearoff=0)
-        self.filemenu.add_command(label="Export Rules", command = self.exportConfig)
-        self.filemenu.add_command(label="Import Rules", command = self.importConfig)
+        self.filemenu.add_command(label="Export Configuration", command = self.exportConfig)
+        self.filemenu.add_command(label="Import Configuration", command = self.importConfig)
         self.filemenu.add_separator()
         self.filemenu.add_command(label="Exit", command = root.quit)
         self.menubar.add_cascade(label="File", menu = self.filemenu)
