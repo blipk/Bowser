@@ -1,4 +1,4 @@
-## Bowser for linux
+# Bowser for linux
 
 Acts as the default web browser and allows you to set up rules to open specific URLs in specific web browsers.
 
@@ -17,7 +17,7 @@ Open Bowser from your desktop environments application menu, here you can create
 
 Use the Settings menu to: enable/disable Bowser, set the default web browser for links without rules, or rescan for installed web browsers.<br/>
 
-Use the File menu to export or import your rules and configuration from files for backup. Use the Help menu to find this readme.<br/>
+Use the File menu to export or import your rules and settings from files for backup. Use the Help menu to find this readme.<br/>
 
 
 ![Bowser Settings GUI](doc/BowserGUI.png?raw=true "Screenshot of Bowser Settings GUI")
@@ -27,15 +27,17 @@ Choose another web browser to make it the default for the selected rule.<br/>
 Double click a rule to edit it. Use the Delete Rule button to delete the selected rule.<br/>
 All changes are saved as they are made.<br/>
 
+#### Press New Rule to make a rule
 
 ![Bowser Add Rule Dialog](doc/BowserAddRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
 
-Use New Rule to make a rule, enter the text to search for and which parts of the URL you would like for it to be searched in.
+Enter the text to search for and which parts of the URL you would like for it to be searched in.
 
+#### Enable 'Always Ask' under Default Web Browser
 
 ![Bowser Ask Rule Dialog](doc/BowserAskRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
 
-If you enable 'Always ask' under the default web browser menu, a popup with a list of your web browsers will show when opening a link without a rule.
+A popup with a list of your web browsers will show when opening a link without a rule.
 
 A rule will be created for that domain for the web browser you select. Select other parts of the URL to include them as well as the domain.
 
