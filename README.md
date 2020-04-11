@@ -15,7 +15,7 @@ Run Bowser with python3 or bash to install:
 
 Open Bowser from your desktop environments application menu, here you can create and manage rules.<br/>
 
-Use the Settings menu to: enable/disable Bowser, set the default browser for links without rules or rescan for installed web browsers.<br/>
+Use the Settings menu to: enable/disable Bowser, set the default web browser for links without rules or rescan for installed web browsers.<br/>
 
 Use the File menu to export or import your rules and configuration from files for backup. Use the Help menu to find this readme.<br/>
 
@@ -23,7 +23,7 @@ Use the File menu to export or import your rules and configuration from files fo
 ![Bowser Settings GUI](doc/BowserGUI.png?raw=true "Screenshot of Bowser Settings GUI")
 
 Select a rule and the web browser it opens with will show in the drop down box.<br/>
-Choose another browser to make it the default for the selected rule.<br/>
+Choose another web browser to make it the default for the selected rule.<br/>
 Double click a rule to edit it. Use the Delete button to delete the selected rule<br/>
 All changes are saved as they are made.<br/>
 
@@ -35,9 +35,9 @@ Use New Rule to create a rule, enter the text to search for and select which par
 
 ![Bowser Ask Rule Dialog](doc/BowserAskRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
 
-If you enable 'Always ask' under the defaul browser menu, a popup with a list of browsers will show when opening a link without a rule.
+If you enable 'Always ask' under the default web browser menu, a popup with a list of your web browsers will show when opening a link without a rule.
 
-A rule will be created for that domain for the browser you select. Select other parts of the URL to include them as well as the domain.
+A rule will be created for that domain for the web browser you select. Select other parts of the URL to include them as well as the domain.
 
 Press the Bowser icon to open settings. Press cancel to close and do nothing.
 
