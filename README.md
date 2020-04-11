@@ -4,9 +4,9 @@ Acts as the default web browser and allows you to set up rules to open specific 
 
 ### Installation
 
-Run Bowser with python3 OR bash to install:
+Run Bowser with python3 or bash to install:
 
- ```python3 bowser.py```
+ ```python3 bowser.py``` OR
 
  ```./bowser.py```
 
@@ -30,7 +30,7 @@ All changes are saved as they are made.<br/>
 
 ![Bowser Add Rule Dialog](doc/BowserAddRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
 
-Use New Rule to make a rule, enter the text to search for and select which parts of the URL you would like for it to be searched in.
+Use New Rule to make a rule, enter the text to search for and which parts of the URL you would like for it to be searched in.
 
 
 ![Bowser Ask Rule Dialog](doc/BowserAskRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
