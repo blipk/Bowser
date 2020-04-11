@@ -7,6 +7,7 @@ Acts as the default web browser and allows you to set up rules to open specific 
 Run Bowser with python3 or bash to install:
 
  ```python3 bowser.py```
+
  ```./bowser.py```
 
 
@@ -14,18 +15,21 @@ Run Bowser with python3 or bash to install:
 
 Open Bowser from your desktop environments application menu, here you can create and manage rules.
 
-Use the Settings menu to enable/disable Bowser, to detect installed web browsers, or to set the default browser for links without rules.
+Use the Settings menu to:
+    - Enable or disable Bowser
+    - Scan and detect installed web browsers
+    - To set the default browser for links without rules
 
 Use the File menu to Export or Import your rules and configuration from files for backup. Use the Help menu to find this readme.
 
 
 ![Bowser Settings GUI](doc/BowserGUI.png?raw=true "Screenshot of Bowser Settings GUI")
 
-Select a rule and the web browser it opens with will show in the drop down box.
-Choose another browser to make it the default for the selected rule. 
+- Select a rule and the web browser it opens with will show in the drop down box.
+- Choose another browser to make it the default for the selected rule. 
 
-Double click a rule to edit it.
-All changes are saved as they are made.
+- Double click a rule to edit it.
+- All changes are saved as they are made.
 
 ![Bowser Add Rule Dialog](doc/BowserAddRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
 
