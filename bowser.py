@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
  * Bowser for linux. 
  * Uses XDG desktop entries to find installed web browsers and sets itself as the default,
@@ -25,65 +26,90 @@
 
 import sys
 import os
-import json
-import tkinter
 import subprocess
-import functools
+import json
 import re
-from tkinter import *
-from tkinter import ttk, simpledialog, filedialog, messagebox
+import importlib
+import ntpath
 from os import listdir, path
-from os.path import isfile, join, expanduser
-from functools import partial
+from os.path import isfile, join
+from multiprocessing import Process
+import bowserGlobals as bowser
 
-homePath = expanduser("~")
 appPath = '/usr/share/applications/'
-userAppPath = homePath+'/.local/share/applications/'
-configDir = homePath + '/.config/bowser/'
-configFile = homePath + '/.config/bowser/bowser.conf'
-try: URI = sys.argv[1]
-except: URI = '--settings'
+userAppPath = bowser.homePath+'/.local/share/applications/'
+configDir = bowser.homePath + '/.config/bowser/'
+configFile = bowser.homePath + '/.config/bowser/bowser.conf'
+uriFile = bowser.homePath + '/.config/bowser/.openuri'
+try: bowser.URI = sys.argv[1]
+except: bowser.URI = '--settings'
+if (bowser.URI == "''" or bowser.URI == ''): bowser.URI = '--settings'
+bowser.URI = bowser.URI.strip("'")
+
+#CONTROL CHECK
+def isRunning(count = 0):
+    cmd = ['pgrep -f .*python.*bowser.py']
+    process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    my_pid, err = process.communicate()
+
+    print (my_pid.splitlines())
+    if len(my_pid.splitlines()) > count: return True
+    else: return False
+def passURI():
+    if (bowser.URI.find('--settings') > -1): return
+    with open(uriFile, 'w+') as file: file.write(bowser.URI); file.close()
+def checkURI():
+    bowser.bowserSettings.root.after(1000, checkURI)
+    if (not os.path.isfile(uriFile)):  return
+    print('found uri file')
+    with open(uriFile, 'r') as file: bowser.URI = file.read(); file.close()
+    os.remove(uriFile)
+    bowser.openBrowser()
+if (isRunning(2)): #Shouldn't be more than 2 instances running
+    print('To do')#TO DO kill the others, application logic SHOULD prevent this from happening for now
+    
+if (isRunning(1)):
+    #TO DO check which dialog is open and open settings if its the unmatched one and we want settings
+    #or create a log of URIs in passURI() to be opened as sequential dialogs
+    passURI()
+    exit()
 
 #CONFIG
-config = {}
-browserApps = {}
-uriPrefs = {}
-defaultBrowser = ''
 def cleanConfig():
-    global browserApps
-    for browserApp in browserApps: 
-        try: del browserApps[browserApp][3]   #Remove Tk.BooleanVar which is used for GUI state
-        except: print('Unused')
+    for browserApp in bowser.browserApps: 
+        try: del bowser.browserApps[browserApp][4]   #Remove Tk.BooleanVar which is used for GUI state
+        except: print('No var to clean')
 def saveConfig(cFile = configFile):
-    global config, browserApps, defaultBrowser, uriPrefs, configFile
     cleanConfig()
-    config = {'browserApps': browserApps, 'defaultBrowser': defaultBrowser, 'uriPrefs': uriPrefs}
+    bowser.Config = {'browserApps': bowser.browserApps, 'defaultBrowser': bowser.defaultBrowser, 'uriPrefs': bowser.uriPrefs, 'askOnUnmatchedURI': bowser.askOnUnmatchedURI}
     if not path.exists(configDir): os.makedirs(configDir)
     if not path.exists(cFile): os.mknod(cFile)
-    with open(cFile, 'w+') as file: file.write(json.dumps(config)); file.close()
+    with open(cFile, 'w+') as file: file.write(json.dumps(bowser.Config)); file.close()
     print("Config saved.")
 def readConfig(cFile = configFile):
-    global config, browserApps, defaultBrowser, uriPrefs
-    with open(cFile, 'r') as file: config = json.load(file); file.close()
-    browserApps = config['browserApps']
-    defaultBrowser = config['defaultBrowser']
-    uriPrefs = config['uriPrefs']
+    with open(cFile, 'r') as file: bowser.Config = json.load(file); file.close()
+    bowser.browserApps = bowser.Config['browserApps']
+    bowser.defaultBrowser = bowser.Config['defaultBrowser']
+    bowser.uriPrefs = bowser.Config['uriPrefs']
+    bowser.askOnUnmatchedURI = bowser.Config['askOnUnmatchedURI']
     print("Config read.")
-#END config
 
 #SETUP
-if not path.exists(homePath+'/.local/share/icons/hicolor/256x256/apps/'): os.makedirs(homePath+'/.local/share/icons/hicolor/256x256/apps/')
-if not path.exists(homePath+'/.local/share/icons/hicolor/scalable/apps/'): os.makedirs(homePath+'/.local/share/icons/hicolor/scalable/apps/')
-os.system("cp bowser.svg ~/.local/share/icons/hicolor/scalable/apps && xdg-icon-resource install --novendor --context apps --size 256 bowser.png bowser")
 def setup(init = False):
     os.system("mkdir ~/.config/bowser/")
     os.system("cp bowser.py ~/.config/bowser/ && chmod +777 ~/.config/bowser/bowser.py")
+    os.system("cp bowserSettings.py ~/.config/bowser/ && chmod +777 ~/.config/bowser/bowserSettings.py")
+    os.system("cp bowserGlobals.py ~/.config/bowser/")
     os.system("cp bowser.png ~/.config/bowser/")
     os.system("xdg-desktop-menu install bowser.desktop --novendor")
+    if not path.exists(bowser.homePath+'/.local/share/icons/hicolor/256x256/apps/'): os.makedirs(bowser.homePath+'/.local/share/icons/hicolor/256x256/apps/')
+    if not path.exists(bowser.homePath+'/.local/share/icons/hicolor/scalable/apps/'): os.makedirs(bowser.homePath+'/.local/share/icons/hicolor/scalable/apps/')
+    os.system("cp bowser.svg ~/.local/share/icons/hicolor/scalable/apps && xdg-icon-resource install --novendor --context apps --size 256 bowser.png bowser")
     
-    global browserApps, defaultBrowser, uriPrefs
+    bowser.browserApps = {}
     installedApps = [appPath+f for f in listdir(appPath) if isfile(join(appPath, f))]
     installedApps += [userAppPath+f for f in listdir(userAppPath) if isfile(join(userAppPath, f))]
+    currentBrowser = getxdgDefaultWebBrowser()
     for app in installedApps:
         if (app.find('bowser.desktop') > -1): continue
         f = open(app, "r"); contents = f.read(); f.close()
@@ -96,239 +122,88 @@ def setup(init = False):
                 nameLoc = contents.find("Name=")
                 execLoc = contents.find("Exec=")
                 mimesLoc = contents.find("MimeType=")
-                browserApps.update({app: [  
+                iconLoc = contents.find("Icon=")
+                bowser.browserApps.update({app: [  
                     contents[nameLoc+5:contents.find("\n", nameLoc)],
                     contents[execLoc+5:contents.find("\n", execLoc)],
-                    list(filter(    lambda x: x != "", contents[mimesLoc+9:contents.find("\n", mimesLoc)].split(';') ))
+                    list(filter(    lambda x: x != "", contents[mimesLoc+9:contents.find("\n", mimesLoc)].split(';') )),
+                    contents[iconLoc+5:contents.find("\n", iconLoc)],
                 ]})
 
-    currentBrowser = subprocess.check_output(['xdg-settings', 'get', 'default-web-browser']).decode('utf-8').replace('\n', '');
-    if (not currentBrowser == 'bowser.desktop' and init == True): defaultBrowser = currentBrowser; setxdgDefaultWebBrowser();
-    if (defaultBrowser == 'bowser.desktop' or defaultBrowser == ''): defaultBrowser = list(browserApps)[0]
+                if(app.find(currentBrowser) > -1): currentBrowser = app
+
+    bowser.defaultBrowser = currentBrowser
+    if (init): bowser.askOnUnmatchedURI = True
+    if (init and not currentBrowser.find('bowser.desktop') > -1): setxdgDefaultWebBrowser();
+    if (bowser.defaultBrowser.find('bowser.desktop') > -1 or bowser.defaultBrowser == ''):  bowser.defaultBrowser = list(bowser.browserApps)[0]
     tmp = {'scheme': True, 'authority': True, 'path': True, 'query': True, 'fragment': True}
-    if not bool(uriPrefs): uriPrefs = {'youtube.com': {'defaultBrowser': defaultBrowser, 'uriOptions': tmp}, 'youtu.be': {'defaultBrowser': defaultBrowser, 'uriOptions': tmp}}
+    
+    if not bool(bowser.uriPrefs): bowser.uriPrefs = {'youtube.com': {'defaultBrowser': bowser.defaultBrowser, 'uriOptions': tmp}, 'youtu.be': {'defaultBrowser': bowser.defaultBrowser, 'uriOptions': tmp}}
     saveConfig()
     print('Setup completed and config saved');
+def getxdgDefaultWebBrowser():
+    currentBrowser = subprocess.check_output(['xdg-settings', 'get', 'default-web-browser']).decode('utf-8').replace('\n', '')
+    return currentBrowser
 def setxdgDefaultWebBrowser(browser='bowser.desktop'):
-    os.system('xdg-settings set default-web-browser ' + browser)
+    pathName, fileName = ntpath.split(browser)
+    os.system('xdg-settings set default-web-browser ' + fileName)
     print(browser + ' is now the default browser');
-def detectWebBrowsers():
-    setup(False)
-    messagebox.showinfo(title=None, message="Your installed web browsers have been scanned and updated.")
-def disableBowser():
-    setxdgDefaultWebBrowser(defaultBrowser);
-    messagebox.showinfo(title=None, message="Bowser has been disabled and links will now open with " + browserApps[defaultBrowser][0] + ".")
-def enableBowser():
-    setxdgDefaultWebBrowser()
-    messagebox.showinfo(title=None, message="Bowser has been enabled, rules are active.")
-#END SETUP
-
-#MAIN
-def openBrowser():
-    global URI
-    regexPattern = ("^(?P<s1>(?P<s0>[^:/\?#]+):)?(?P<a1>" 
-                    "//(?P<a0>[^/\?#]*))?(?P<p0>[^\?#]*)" 
-                    "(?P<q1>\?(?P<q0>[^#]*))?" 
-                    "(?P<f1>#(?P<f0>.*))?")
-    regex = re.compile(regexPattern)
-    output = regex.match(URI)
+def openBrowser(overrideBrowser = False):
+    print(bowser.URI)
+    browser = bowser.defaultBrowser
+    if (bool(overrideBrowser)): 
+        pathName, fileName = ntpath.split(overrideBrowser)
     
-    if (output.group('a1') == None):     #Regex isn't perfect if there's no scheme
-        URI = 'https://' + URI
-        output = regex.match(URI)
-
-    splitURI = {'scheme': output.group('s1'), 'authority': output.group('a0'), 'path': output.group('p0'), 'query': output.group('q1'), 'fragment': output.group('f1')}
-
-
+    splitURI = bowser.splitURI(bowser.URI)    
     matchFound = False
-    for pref in config['uriPrefs']:
-        for x in config['uriPrefs'][pref]['uriOptions']:
-            if (config['uriPrefs'][pref]['uriOptions'][x] == False): continue;
-            if (str(splitURI[x]).find(pref) > -1):
-                matchFound = True
-                execCmd = browserApps.get(uriPrefs[pref]['defaultBrowser'])[1].replace("%u", URI).replace("%U", URI)
-                os.system(execCmd)
-    if (matchFound): exit()
-    execCmd = browserApps.get(defaultBrowser)[1].replace("%u", URI).replace("%U", URI)
-    os.system(execCmd);
-
-#SETTINGS GUI
-lastSelected = ''
-lastSelectedIndex = 0
-def settings():
-    class AddDialog(simpledialog.Dialog):
-        def body(self, master):
-            self.iconphoto(False, PhotoImage(file='/home/kronosoul/.config/bowser/bowser.png'))
-            Label(master, text="Text to search for:   ").grid(row=0, column=0, columnspan=1, sticky=E)
-            self.input = Entry(master)
-            self.input.grid(row=0, column=1, columnspan=5, sticky=W+E+N+S)
-            Label(master, text="Parts of the link to search in:").grid(row=2, column=0, columnspan=5, sticky=W)
-            Label(master, text="http://", fg="green").grid(row=3, column=0, sticky=E)
-            Label(master, text="example.com:8023").grid(row=3, column=1, sticky=W)
-            Label(master, text="/directions/here", fg="green").grid(row=3, column=2, sticky=W)
-            Label(master, text="?name=value").grid(row=3, column=3, sticky=W)
-            Label(master, text="#bookmark", fg="green").grid(row=3, column=4, sticky=W)
+    for pref in bowser.Config['uriPrefs']:
+        compareURI = ''
+        #print('!!!!!!Searching pref', pref, ' against ', bowser.URI)
+        for x in bowser.Config['uriPrefs'][pref]['uriOptions']:
+            if (bowser.Config['uriPrefs'][pref]['uriOptions'][x] == False): continue;
+            if (bool(splitURI[x]) and x != 'scheme'): compareURI += str(splitURI[x])
             
-            def checkAll():
-                for v in self.uriParts_cbs: self.uriParts_cbs[v].var.set(True)
-            self.all = Button(master, text="All", command=checkAll)
-            self.all.grid(row=4, column=0, sticky=W)
-            self.uriParts = {'scheme': False, 'authority': False, 'path': False, 'query': False, 'fragment': False}
-            self.uriParts_cbs = dict()
-            for checkbox in self.uriParts:
-                self.uriParts_cbs[checkbox] = Checkbutton(master, text="", onvalue=True, offvalue=False);
-                self.uriParts_cbs[checkbox].var = BooleanVar(); self.uriParts_cbs[checkbox].var.set(True)
-                self.uriParts_cbs[checkbox]['variable'] = self.uriParts_cbs[checkbox].var
-            self.uriParts_cbs['scheme'].grid(row=4, column=0, sticky=E)
-            self.uriParts_cbs['authority'].grid(row=4, column=1)
-            self.uriParts_cbs['path'].grid(row=4, column=2)
-            self.uriParts_cbs['query'].grid(row=4, column=3)
-            self.uriParts_cbs['fragment'].grid(row=4, column=4  )
-
-            return self.input #initial focus
-        def apply(self):
-            name = self.input.get()
-            for option in self.uriParts:
-                self.uriParts[option] = self.uriParts_cbs[option].var.get();
-            self.result = {'name': name, 'uriOptions': self.uriParts}
-
-    global config, browserApps, defaultBrowser, uriPrefs
-    def ui_update():
-        lbPrefs_update()
-        browsermenu_update()
-        saveConfig(); readConfig()
-        browsermenu_update()
-    def browsermenu_update(event = None):
-        global defaultBrowser
-        browsermenu.delete(0, END)
-        for browserApp in browserApps:
-            try: browserApps[browserApp][3]
-            except IndexError: browserApps[browserApp].append(BooleanVar())
-            if (defaultBrowser == browserApp): browserApps[browserApp][3].set(True)
-            else: browserApps[browserApp][3].set(False)
-            browsermenu.add_checkbutton(label = browserApps[browserApp][0], onvalue=1, offvalue=0, 
-                                                                            variable = browserApps[browserApp][3], 
-                                                                            command = functools.partial(updateDefaultBrowser, browserApp))
-    def lbPrefs_update():
-        global uriPrefs
-        lbPrefs.delete(0, END)
-        for uriPref in uriPrefs: lbPrefs.insert(END, uriPref)
-    def lbPrefs_cbSelected(event):
-        global lastSelected, uriPrefs
-        try: lastSelected = lbPrefs.get(lbPrefs.curselection()); lastSelectedIndex = lbPrefs.nearest(event.y)
-        except: print('None selected')
-        if (lastSelected == ''): return
-        b = uriPrefs[lastSelected]['defaultBrowser']
-        dbBrowsers.current(  dbBrowsers['values'].index(browserApps[b][0])   )
-    def dbBrowsers_cbSelected(event):
-        global lastSelected
-        if (lastSelected == ''): return
-        selectedApp = ''
-        for browserApp in browserApps:
-            if(browserApps[browserApp][0] == dbBrowsers['values'][dbBrowsers.current()]): selectedApp = browserApp
-        uriPrefs[lastSelected]['defaultBrowser'] = selectedApp
-        ui_update()
-    def btnDelete_cb():
-        global lastSelected
-        if (lastSelected == ''): return
-        del uriPrefs[lbPrefs.get(lbPrefs.curselection())]
-        lbPrefs.delete(ANCHOR)
-        ui_update()
-    def btnAdd_cb():
-        out = ''
-        addDialog = AddDialog(root, "New Rule")
-        if (addDialog.result == None or not bool(addDialog.result['uriOptions']) or addDialog.result['name'] == None or addDialog.result['name'] == ''): return;
-        out = {addDialog.result['name']: {'defaultBrowser': defaultBrowser, 'uriOptions': addDialog.result['uriOptions']}}
-        uriPrefs.update(out)
-        ui_update()
-    def importConfig():
-        print('Importing Config')
-        global config, browserApps, uriPrefs, defaultBrowser
-        inFile = filedialog.askopenfile()
-        if (inFile == None): print('No file selected'); return
-        config = json.load(inFile); inFile.close()
-        browserApps = config['browserApps']
-        defaultBrowser = config['defaultBrowser']
-        print(defaultBrowser)
-        uriPrefs = config['uriPrefs']
-        ui_update()
-    def exportConfig():
-        global config
-        outFile = filedialog.asksaveasfile()
-        if (outFile == None): print('No file selected'); return
-        cleanConfig()
-        outFile.write(json.dumps({'browserApps': browserApps, 'defaultBrowser': defaultBrowser, 'uriPrefs': uriPrefs})); 
-        outFile.close()
-    def openAppWebsite():
-        global URI
-        URI = 'https://github.com/blipk/Bowser'
-        openBrowser()
-    def updateDefaultBrowser(newDefault):
-        global defaultBrowser, browserApps
-        for browserApp in browserApps:
-            try: browserApps[browserApp][3]
-            except IndexError: browserApps[browserApp].append(BooleanVar())
-            browserApps[browserApp][3].set(False)
-            if (browserApp == newDefault): 
-                browserApps[browserApp][3].set(True)
-                defaultBrowser = browserApp
-        print(browserApps[defaultBrowser][0] + ' is now the default browser')
-        ui_update()
-
-    root = Tk()
-    root.title("Bowser")
-    root.iconphoto(False, PhotoImage(file='/home/kronosoul/.config/bowser/bowser.png'))
-
-    lbPrefs = Listbox(root)
-    lbPrefs.grid(column=0, row=1, columnspan=2)
-    lbPrefs_update()
-    lbPrefs.bind("<<ListboxSelect>>", lbPrefs_cbSelected)
-
-    btnAdd = Button(root, text = "Add Rule", command = btnAdd_cb)  
-    btnAdd.grid(column=0, row=0)
-    btnDelete = Button(root, text = "Delete Rule", command = btnDelete_cb)  
-    btnDelete.grid(column=1, row=0)
+            #print('compare', compareURI, pref)
+            if (matchFound): continue
+            if (str(splitURI[x]).find(pref) > -1 or compareURI.find(pref) > -1 and bool(compareURI)):
+                matchFound = True
+                print('---Match found') 
+                execCmd = bowser.browserApps.get(bowser.uriPrefs[pref]['defaultBrowser'])[1].replace("%u", "").replace("%U", "").strip()
+                process = subprocess.Popen([execCmd, bowser.URI], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     
-    dbBrowsers = ttk.Combobox(root)
-    dbBrowsers.grid(column=0, row=2, columnspan=2)    
-    dbBrowsers.bind("<<ComboboxSelected>>", dbBrowsers_cbSelected)
-    values = []
-    for browserApp in browserApps: values.append(browserApps[browserApp][0])
-    dbBrowsers['values'] = values
-
-    menubar = Menu(root)
-
-    filemenu = Menu(menubar, tearoff=0)
-    filemenu.add_command(label="Export Rules", command = exportConfig)
-    filemenu.add_command(label="Import Rules", command = importConfig)
-    filemenu.add_separator()
-    filemenu.add_command(label="Exit", command = root.quit)
-    menubar.add_cascade(label="File", menu = filemenu)
-
-    settingsmenu = Menu(menubar, tearoff=0)
-    browsermenu = Menu(settingsmenu, tearoff=0)
-    settingsmenu.add_cascade(label="Default Web Browser", menu = browsermenu)
-    browsermenu_update()
-    settingsmenu.add_command(label="Enable Bowser", command = enableBowser)
-    settingsmenu.add_command(label="Disable Bowser", command = disableBowser)
-    settingsmenu.add_command(label="Detect installed web browsers", command = lambda:[detectWebBrowsers(), ui_update()])
-    menubar.add_cascade(label="Settings", menu = settingsmenu)
-
-
-    helpmenu = Menu(menubar, tearoff=0)
-    helpmenu.add_command(label="About...", command = openAppWebsite)
-    menubar.add_cascade(label="Help", menu = helpmenu)
-
-    root.config(menu=menubar)
-    root.mainloop()
-    exit()
-#END settings
+    if (matchFound and bowser.bowserSettings == None): exit()
+    
+    if (bowser.askOnUnmatchedURI and not matchFound):
+        bowser.bowserSettings.openUnmatchedURIDialog()
+    elif (not matchFound):
+        execCmd = bowser.browserApps.get(bowser.uriPrefs[pref]['defaultBrowser'])[1].replace("%u", "").replace("%U", "").strip()
+        process = subprocess.Popen([execCmd, bowser.URI], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if (bowser.bowserSettings == None): exit()
 
 #MAIN
 if not (path.exists(configFile)): setup()
-else: readConfig()
-if (URI == '--enable'): setxdgDefaultWebBrowser(); exit()
-if (URI == '--disable'): setxdgDefaultWebBrowser(defaultBrowser); exit()
-if (URI == '--settings'): settings(); 
-if (URI == '--setup'): setup(); settings();
-openBrowser()
+else: readConfig(); 
+def settingsVars():
+    bowser.cleanConfig = cleanConfig
+    bowser.saveConfig = saveConfig
+    bowser.readConfig = readConfig
+    bowser.getxdgDefaultWebBrowser = getxdgDefaultWebBrowser
+    bowser.setxdgDefaultWebBrowser = setxdgDefaultWebBrowser
+    bowser.setup = setup
+    bowser.openBrowser = openBrowser
+    bowser.checkURI = checkURI
+def settings():
+    if (bool(bowser.bowserSettings)): 
+        if (callable(bowser.bowserSettings)):
+            settingsVars()
+            bowser.bowserSettings()
+        else: bowser.bowserSettings.start()
+if __name__ == "__main__": 
+    settingsVars()
+    bowser.bowserSettings = importlib.import_module('bowserSettings')
+
+if (bowser.URI == '--enable'): setxdgDefaultWebBrowser();
+elif (bowser.URI == '--disable'): setxdgDefaultWebBrowser(bowser.defaultBrowser)
+elif (bowser.URI == '--settings'): print(bowser.URI); settings()
+elif (bowser.URI == '--setup'): setup(True); settings()
+else: openBrowser()

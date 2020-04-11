@@ -14,7 +14,6 @@
    width="512pt"
    viewBox="0 -1 512.10588 512"
    height="512pt"
-   inkscape:export-filename="/home/kronosoul/dev/linux/bowser/bowser.png"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96">
   <metadata
@@ -23,8 +22,6 @@
       <cc:Work
          rdf:about="">
         <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
       </cc:Work>
     </rdf:RDF>
   </metadata>

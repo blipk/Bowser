@@ -4,30 +4,40 @@ Acts as the default web browser and allows you to set up rules to open specific 
 
 ### Installation
 
-Run Bowser with python3 to install:
+Run Bowser with python3 or bash to install:
 
  ```python3 bowser.py```
+ ```./bowser.py```
 
 
 ### General Usage
 
 Open Bowser from your desktop environments application menu to change the rules. Use the Help menu to find this readme.
 
-![Bowser Settings GUI](BowserGUI.png?raw=true "Screenshot of Bowser Settings GUI")
+![Bowser Settings GUI](doc/BowserGUI.png?raw=true "Screenshot of Bowser Settings GUI")
 
-Select a rule and the web browser it opens with will show in the drop down box.
+Select a rule and the web browser it opens with will show in the drop down box. 
 
-Choose another browser to make it the default for the selected rule. All changes are saved as they are made.
+Choose another browser to make it the default for the selected rule. 
 
-Use the Add button to add a rule, the Delete button to delete the selected rule.
+Double click a rule to edit it. 
+All changes are saved as they are made.
 
-![Bowser Add Rule Dialog](BowserAddRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
+![Bowser Add Rule Dialog](doc/BowserAddRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
+
+Use the Add Rule to add a rule, the Delete button to delete the selected rule.
 
 Enter the text to search for and select which parts of the URL you would like for it to be searched in, default is the whole URL.
 
 Use the File menu to Export or Import your rules and configuration from files for backup.
 
 Use the Settings menu to enable/disable Bowser, to detect installed web browsers, or to set the default browser for links without rules.
+
+![Bowser Ask Rule Dialog](doc/BowserAskRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
+
+If you set the default browser to 'Always ask' a popup with a list of browsers will show when opening a link without a rule.
+A rule will be created for that domain for the browser you select. 
+Select other parts of the URL and they will turn green, including them in the rule.
 
 ### CLI Usage
 Open the Bowser rules settings window:
@@ -52,7 +62,7 @@ Enable Bowser and sets rules to active:
 
 This should work in most linux desktop environments.
 
-May require dependencies
+May require dependencies:
 ```
 sudo apt install python3 python3-tk
 sudo yum install python3 python3-tkinter
