@@ -14,7 +14,10 @@ Run Bowser with python3 or bash to install:<br/>
 
 ## General Usage
 
-Open Bowser from your desktop environments application menu to manage rules and settings.<br/>
+To manage rules and settings, open Bowser from your desktop application menu or with the Bowser icon in the new link menu.<br/>
+
+Bowser will create new rules for you as you open links.<br/>
+This can be disabled in:&nbsp; ```Settings Menu -> Default Web Browser -> Always Ask```<br/>
 
 #### When you open a link:
 
@@ -22,15 +25,16 @@ Open Bowser from your desktop environments application menu to manage rules and 
 <br/>
 A list of your web browsers will show, choose which browser you want the website to open with from now on.<br>
 You can also choose which parts of the web address to include, the default is only the website name.<br/>
-The Bowser icon opens settings, you can disable this menu with:&nbsp; ```Settings Menu -> Default Web Browser -> Always Ask```
+
+#### Managing Rules
 
 ![Bowser Settings GUI](doc/BowserGUI.png?raw=true "Screenshot of Bowser Settings GUI")
 <br/>
  Select a rule and the web browser it opens with will show in the drop down box, changing it will apply it to that rule.<br/>
- Double click a rule to edit it. Use ```Delete Rule``` to delete the selected rule.<br/>
+ Double click a rule to edit it. ```Delete Rule``` will delete the selected rule. ```New Rule``` will let you create a rule.<br/>
 
 
-#### Use New Rule to create a rule:
+#### Creating/Editing Rules
 
 ![Bowser Add Rule Dialog](doc/BowserAddRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
 <br/>
