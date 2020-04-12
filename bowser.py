@@ -192,7 +192,7 @@ def openBrowser(overrideBrowser = False):
             exit()
 
 #MAIN
-if not (path.exists(configFile)): setup()
+if not (path.exists(configFile)): setup(True)
 else: readConfig(); 
 def settingsVars():
     bowser.cleanConfig = cleanConfig
