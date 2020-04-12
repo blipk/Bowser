@@ -62,7 +62,7 @@ class tkAddEditDialog(simpledialog.Dialog):
         for element in splitURI:
             if ((element.find('NoTrim') > -1) or splitURI[element] == None or splitURI[element] == ''): continue
             if (self.uriParts[element]): state = 'normal'
-            self.urlLabels.append(tk.Label(selfFrame, text=splitURI[element], bd = 0, padx = 0, fg = 'green', disabledforeground = 'red', state = state))
+            self.urlLabels.append(tk.Label(selfFrame, text=splitURI[element], bd = 0, padx = 0, fg = 'green', disabledforeground = '#F47A00', state = state))
             self.urlLabels[i].grid(row=3, column=i, sticky=stick)
             self.urlLabels[i].bind("<Button-1>", functools.partial(self.toggleURIOptions, i))
             stick = tk.W 
@@ -125,7 +125,7 @@ class tkUnmatchedURIDialog(tk.Frame):
             maxLength = 7
             if (i == 0): maxLength = 40
             if (i == 1): maxLength = 15
-            self.urlLabels.append(tk.Label(master, bd = 0, padx = 0, fg = 'green', disabledforeground = 'red', state = state))
+            self.urlLabels.append(tk.Label(master, bd = 0, padx = 0, fg = 'green', disabledforeground = '#F47A00', state = state))
             self.urlLabels[i].fullText = splitURI[element]
             self.urlLabels[i].elementName = element
             labelText = (splitURI[element][:maxLength] + '..') if len(splitURI[element]) > maxLength else splitURI[element]
@@ -136,9 +136,7 @@ class tkUnmatchedURIDialog(tk.Frame):
             stick = tk.W 
             i += 1
 
-        if (i == 1): 
-            #self.urlLabels[0].grid(row=0, column=0, sticky=tk.W+tk.E+tk.N+tk.S) #Centre if only domain
-            tk.Label(master, text="", bd = 0, padx = 0, state = 'disabled').grid(row=0, column=1); i+=1 #padding for formatting
+        if (i == 1): tk.Label(master, text="", bd = 0, padx = 0, state = 'disabled').grid(row=0, column=1); i+=1 #padding for formatting
             
         self.i = 0
         self.images = list()
@@ -156,15 +154,13 @@ class tkUnmatchedURIDialog(tk.Frame):
             self.browserButtons[self.i].grid_columnconfigure(0, weight=1)
             self.browserButtons[self.i].grid_rowconfigure(0, weight=1)
             self.i += 1
-            
+
         
-        #span = (i + 2 // 2) // 2
         self.settingsImage = tk.PhotoImage(file=bowser.homePath+'/.config/bowser/bowser.png').subsample(8)
         self.btnSettings = tk.Button(master, image = self.settingsImage, command = self.openSettings, borderwidth = 0, anchor = tk.CENTER, padx = 50, width = 70)  
         self.btnSettings.grid(column=0, row=self.i+1, columnspan=1, sticky=tk.W)
         self.btnQuit = tk.Button(master, text = "Cancel", command = self.cancel, borderwidth = 0, anchor = tk.CENTER)
         self.btnQuit.grid(column=i-1, row=self.i+1, columnspan=i-1, sticky=tk.W+tk.E+tk.N+tk.S)
-        
 
     def openSettings(self):
         global slave, root, settingsApp, unmatchedApp
@@ -256,12 +252,12 @@ class tkBowserSettings(tk.Frame):
         self.lastSelected = ''
         self.lastSelectedIndex = 0
 
-        self.btnNewRule = tk.Button(self, text = "New Rule", command = self.btnNewRule_cb, bd = 0)  
+        self.btnNewRule = tk.Button(self, text = "New Rule", command = self.btnNewRule_cb, bd = 0, bg = '#F7F5FF', highlightthickness=0)  
         self.btnNewRule.grid(column=0, row=0)
-        self.btnDeleteRule = tk.Button(self, text = "Delete Rule", command = self.btnDeleteRule_cb, bd = 0)  
+        self.btnDeleteRule = tk.Button(self, text = "Delete Rule", command = self.btnDeleteRule_cb, bd = 0, bg = '#F7F5FF', highlightthickness=0)  
         self.btnDeleteRule.grid(column=1, row=0)
         
-        self.lbPrefs = tk.Listbox(self, borderwidth = 0)
+        self.lbPrefs = tk.Listbox(self, borderwidth = 0, height = 10, selectborderwidth = 0, selectforeground = "blue", selectbackground = '#F7F5FF', highlightthickness = 0)
         self.lbPrefs.grid(column=0, row=1, columnspan=2, sticky = tk.W+tk.E+tk.N+tk.S)
         self.lbPrefs_update()
         self.lbPrefs.bind("<<ListboxSelect>>", self.lbPrefs_cbSelected)
@@ -275,18 +271,18 @@ class tkBowserSettings(tk.Frame):
         self.dbBrowsers['values'] = self.values
 
         style = ttk.Style()
-        style.map('TCombobox', fieldbackground=[('readonly', 'white')], borderwidth=[('readonly', '0')], arrowsize=[('readonly', '0')])
+        style.map('TCombobox', fieldbackground=[('readonly', '#7D5DF')], borderwidth=[('readonly', '0')], arrowsize=[('readonly', '0')])
 
-        self.menubar = tk.Menu(self)
+        self.menubar = tk.Menu(self, bg = '#F7F5FF', activebackground = '#F7F5FF', bd = 0)
 
-        self.filemenu = tk.Menu(self.menubar, tearoff=0)
-        self.filemenu.add_command(label="Export Configuration", command = self.exportConfig)
+        self.filemenu = tk.Menu(self.menubar, tearoff=0, bg = '#F7F5FF', activebackground = '#F7F5FF', bd = 0)
+        self.filemenu.add_command(label="Export Configuration", command = self.exportConfig,)
         self.filemenu.add_command(label="Import Configuration", command = self.importConfig)
         self.filemenu.add_separator()
         self.filemenu.add_command(label="Exit", command = root.quit)
         self.menubar.add_cascade(label="File", menu = self.filemenu)
 
-        self.settingsmenu = tk.Menu(self.menubar, tearoff=0)
+        self.settingsmenu = tk.Menu(self.menubar, tearoff=0, bg = '#F7F5FF', activebackground = '#F7F5FF', bd = 0)
         self.bowserEnabled = tk.BooleanVar()
         if (bowser.getxdgDefaultWebBrowser() == 'bowser.desktop'): self.bowserEnabled.set(True)
         self.settingsmenu.add_checkbutton(label="Toggle Bowser", onvalue=1, offvalue=0, variable = self.bowserEnabled, command = self.toggleBowser)
@@ -295,7 +291,7 @@ class tkBowserSettings(tk.Frame):
         
         if (bowser.askOnUnmatchedURI == True): self.askOnUnmatchedURI.set(True)
         
-        self.browsermenu = tk.Menu(self.settingsmenu, tearoff=0)
+        self.browsermenu = tk.Menu(self.settingsmenu, tearoff=0, bg = '#F7F5FF', activebackground = '#F7F5FF', bd = 0)
         self.settingsmenu.add_cascade(label="Default Web Browser", menu = self.browsermenu)
         self.browsermenu.add_checkbutton(label="Ask on unmatched links", onvalue=1, offvalue=0, variable = self.askOnUnmatchedURI, command = self.toggleAskOnUmatchedURI)
         self.settingsmenu.add_command(label="Detect installed web browsers", command = lambda:[self.detectWebBrowsers(), self.ui_update()])
@@ -304,7 +300,7 @@ class tkBowserSettings(tk.Frame):
         self.settingsmenu_update()
         self.browsermenu_update()
 
-        self.helpmenu = tk.Menu(self.menubar, tearoff=0)
+        self.helpmenu = tk.Menu(self.menubar, tearoff=0, bg = '#F7F5FF', activebackground = '#F7F5FF', bd = 0)
         self.helpmenu.add_command(label = "About...", command = self.openAppWebsite)
         self.menubar.add_cascade(label = "Help", menu = self.helpmenu)
 
@@ -432,31 +428,28 @@ settingsApp = None
 unmatchedApp = None
 root = tk.Tk()
 slave = None
+def centerWindow(window):
+    window.update_idletasks()
+    width = window.winfo_width()
+    height = window.winfo_height()
+    x = (window.winfo_screenwidth() // 2) - (width // 2)
+    y = (window.winfo_screenheight() // 2) - (height // 2)
+    window.geometry('{}x{}+{}+{}'.format(width, height, x, y))
 def openUnmatchedURIDialog():
     global unmatchedApp, settingsApp, slave, root
-    
-    if (settingsApp != None):
-        slave = tk.Toplevel(root)
-        slave.attributes('-type', 'splash')
-        slave.attributes('-alpha', '0.9')
-        slave.attributes("-topmost", 1)
-        #slave.attributes('-alpha', '0.7')
-        slave.title('Bowser')
-        slave.grid()
-        unmatchedApp = tkUnmatchedURIDialog(slave)
-    else:
-        root.iconphoto(False, tk.PhotoImage(file=bowser.homePath+'/.config/bowser/bowser.png'))
-        root.resizable(width=False, height=False)
-        root.title('Bowser')
+    slave = tk.Toplevel(root)
+    slave.title('Bowser')
+    slave.attributes('-type', 'splash')
+    slave.attributes('-alpha', '0.9')
+    slave.attributes("-topmost", 1)  
+    root.after(1000, bowser.checkURI)
+    slave.grid()
+    unmatchedApp = tkUnmatchedURIDialog(slave)
+    if (settingsApp == None): 
         root.attributes('-type', 'splash')
-        root.attributes('-alpha', '0.9')
-        root.attributes("-topmost", 1)
-        unmatchedApp = tkUnmatchedURIDialog(root)
-        unmatchedApp.grid()
-        root.iconify()
+        root.attributes('-alpha', '0.0')
+        root.attributes("-topmost", 0)  
         root.mainloop()
-
-
 def start():
     global root, settingsApp, unmatchedApp
     root.iconphoto(False, tk.PhotoImage(file=bowser.homePath+'/.config/bowser/bowser.png'))
