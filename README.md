@@ -8,6 +8,10 @@ Becomes the default web browser and allows you to set up rules to open specific 
 
 ## Installation
 
+##### Desktop
+Double Click the 'Install Bowser' desktop file.
+
+##### Command Line
 Run Bowser with python3 or bash to install:<br/>
  ```./bowser.py``` &nbsp;&nbsp; ```OR```<br/>
  ```python3 bowser.py```  

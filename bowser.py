@@ -75,8 +75,7 @@ def checkURI():
         file.close()
     with open(uriFile, 'w') as file: file.write(head[1]); file.close()
     if (bowser.URI != ''): bowser.openBrowser()
-    else:
-        if (bowser.bowserSettings.settingsApp == None): bowser.bowserSettings.root.quit()  
+    elif (bowser.bowserSettings.settingsApp == None): bowser.bowserSettings.root.quit()  
 if (isRunning(2)): #Shouldn't be more than 2 instances running
     #TO DO kill the others, application logic SHOULD prevent this from happening
     print('Error: there should not be more than two instances of bowser running, please kill all bowser python processes')
