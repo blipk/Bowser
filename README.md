@@ -22,7 +22,6 @@ Open Bowser from your desktop environments application menu to manage rules and 
 <br/>
 A list of your web browsers will show, choose which browser you want the website to open with from now on.<br>
 You can also choose which parts of the web address to include, the default is only the website name.<br/>
-
 The Bowser icon opens settings, you can disable this menu with:&nbsp; ```Settings Menu -> Default Web Browser -> Always Ask```
 
 ![Bowser Settings GUI](doc/BowserGUI.png?raw=true "Screenshot of Bowser Settings GUI")
