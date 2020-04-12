@@ -1,76 +1,72 @@
 # Bowser for linux
 
-Acts as the default web browser and allows you to set up rules to open specific URLs in specific web browsers.
+Becomes the default web browser and allows you to set up rules to open specific websites in specific web browsers.
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/deltadevelopments)
+[![Website](https://img.shields.io/badge/Bowser-Homepage-blue)](https://github.com/blipk/Bowser)
+
 
 ## Installation
 
-Run Bowser with python3 or bash to install:
-
- ```./bowser.py``` OR
-
+Run Bowser with python3 or bash to install:<br/>
+ ```./bowser.py``` &nbsp;&nbsp; ```OR```<br/>
  ```python3 bowser.py```  
-
 
 ## General Usage
 
-Open Bowser from your desktop environments application menu, here you can create and manage rules.<br/>
+Open Bowser from your desktop environments application menu to manage rules and settings.<br/>
 
-Use the Settings menu to: enable/disable Bowser, set the default web browser for links without rules, or rescan for installed web browsers.<br/>
-
-Use the File menu to export or import your rules and settings from files for backup. Use the Help menu to find this readme.<br/>
-
-
-![Bowser Settings GUI](doc/BowserGUI.png?raw=true "Screenshot of Bowser Settings GUI")
-
-   Select a rule and the web browser it opens with will show in the drop down box.<br/>
-   Choose another web browser to make it the default for the selected rule.<br/>
-   Double click a rule to edit it. Use the Delete Rule button to delete the selected rule.<br/>
-   All changes are saved as they are made.<br/>
-
-#### Press New Rule to create a rule:
-
-![Bowser Add Rule Dialog](doc/BowserAddRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
-
-   Enter the text to search for and which parts of the URL you would like for it to be searched in.
-
-#### Enable 'Always Ask' under Default Web Browser:
+#### When you open a link:
 
 ![Bowser Ask Rule Dialog](doc/BowserAskRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
+<br/>
+A list of your web browsers will show, choose which browser you want the website to open with from now on.<br>
+You can also choose which parts of the web address to include, the default is only the website name.<br/>
 
-   A popup with a list of your web browsers will show when opening a link without a rule.
+The Bowser icon opens settings, you can disable this menu with:&nbsp; ```Settings Menu -> Default Web Browser -> Always Ask```
 
-   A rule will be created for that domain for the web browser you select. Select other parts of the URL to include them as well as the domain.
+![Bowser Settings GUI](doc/BowserGUI.png?raw=true "Screenshot of Bowser Settings GUI")
+<br/>
+ Select a rule and the web browser it opens with will show in the drop down box, changing it will apply it to that rule.<br/>
+ Double click a rule to edit it. Use ```Delete Rule``` to delete the selected rule.<br/>
 
-   Press the Bowser icon to open settings. Press cancel to close and do nothing.
+
+#### Use New Rule to create a rule:
+
+![Bowser Add Rule Dialog](doc/BowserAddRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
+<br/>
+
+Enter the text to search for and select which parts of the URL you would like for it to be searched in.
+
+#### Menu Options
+Save your rules and settings for later:&nbsp; ```File Menu -> Export Configuration```<br/>
+Load rules and settings from a file:&nbsp; ```File Menu -> Import Configuration```<br/>
+Turn Bowser on/off: &nbsp; ```Settings Menu -> Bowser is Enabled/Disabled```<br/>
+Turn the pop up menu for new links on/off:&nbsp; ```Settings Menu -> Default Web Browser -> Always Ask```<br/>
+Open unmatched links with this browser when menu is disabled:&nbsp; ```Settings Menu -> Default Web Browser -> [Web Browser]```<br/>
+Update which web browsers Bowser knows:&nbsp; ```Settings Menu -> Detect installed web browsers```<br/>
+Find this page:&nbsp; ```Help Menu -> About```<br/>
 
 ## CLI Usage
-Open the Bowser rules settings window:
-
- ```python3 ~/.config/bowser/bowser.py``` OR
- 
+Open the Bowser rules settings window:<br/>
+ ```python3 ~/.config/bowser/bowser.py``` &emsp; ```OR```<br/>
  ```python3 ~/.config/bowser/bowser.py --settings```
 
-Runs initial setup again - rescans installed browsers and sets Bowser as the default:
-
+Runs initial setup again - rescans installed browsers and sets Bowser as the default:<br/>
  ```python3 ~/.config/bowser/bowser.py --setup```
 
-Reset your default browser to handle all URLs:
-
+Reset your default browser to handle all URLs:<br/>
  ```python3 ~/.config/bowser/bowser.py --disable```
 
-Enable Bowser and sets rules to active:
-
+Enable Bowser and sets rules to active:<br/>
  ```python3 ~/.config/bowser/bowser.py --enable```
 
 ## Support
 
-This should work in most linux desktop environments.
-
-May require dependencies:
-```
-sudo apt install python3 python3-tk
-sudo yum install python3 python3-tkinter
-```
+This should work in most linux desktop environments.<br/>
+May require these dependencies in some environments.<br/>
+```sudo apt install python3 python3-tk ``` &nbsp; ```or``` <br/>
+```sudo yum install python3 python3-tkinter```
 
 ##   Licence
 
