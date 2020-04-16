@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
 Name=Bowser
-Name[en_AU]=bowser.desktop
+Name[en_AU]=Bowser
 GenericName=Bowser Web Browser Chooser
 Comment=Set up rules to open specific URLs in specific web browsers
 Exec=bash -c "~/.config/bowser/bowser.py \"%u\""

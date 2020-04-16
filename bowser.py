@@ -56,14 +56,15 @@ def isRunning(count = 0):
     if len(my_pid.splitlines()) > count: return True
     else: return False
 def passURI():
-    if (bowser.URI == '--settings' or bowser.URI == '--setup' or bowser.URI == '' or bowser.URI == None): return
+    if (bowser.URI == '' or bowser.URI == None): return
     with open(uriFile, 'a+') as file: file.write(bowser.URI+"\r\n"); file.close()
 def checkURI():
     bowser.bowserSettings.root.after(1000, checkURI)
+    readConfig()
+    if (bowser.bowserSettings.settingsApp != None): bowser.bowserSettings.settingsApp.ui_update()
 
-    if (bowser.bowserSettings.unmatchedApp != None): return
+    if (bowser.bowserSettings.unmatchedApp != None): return #Wait for current prompt
     if (not os.path.isfile(uriFile)):  return
-    
     lines = list()
     head = tail = None
     with open(uriFile, 'r') as file: 
@@ -74,22 +75,23 @@ def checkURI():
         bowser.URI = head[0]; 
         file.close()
     with open(uriFile, 'w') as file: file.write(head[1]); file.close()
-    if (bowser.URI != ''): bowser.openBrowser()
-    elif (bowser.bowserSettings.settingsApp == None): bowser.bowserSettings.root.quit()  
+    if (bowser.URI != ''): 
+        if (bowser.URI[0:2] == '--'):
+            if (bowser.URI == '--settings'): bowser.bowserSettings.appear()
+            bowser.URI = ''
+        else: bowser.openBrowser()
+    elif (bowser.bowserSettings.settingsApp == None): bowser.bowserSettings.root.quit()
 if (isRunning(2)): #Shouldn't be more than 2 instances running
     #TO DO kill the others, application logic SHOULD prevent this from happening
     print('Error: there should not be more than two instances of bowser running, please kill all bowser python processes')
-if (isRunning(1)):
-    passURI()
     exit()
+if (isRunning(1)):
+    if (bowser.URI != '--enable' and bowser.URI != '--disable'):
+        passURI()
+        exit()
 
 #CONFIG
-def cleanConfig():
-    for browserApp in bowser.browserApps: 
-        try: del bowser.browserApps[browserApp][4]   #Remove Tk.BooleanVar which is used for GUI state
-        except: print('No var to clean')
 def saveConfig(cFile = configFile):
-    cleanConfig()
     bowser.Config = {'browserApps': bowser.browserApps, 'defaultBrowser': bowser.defaultBrowser, 'uriPrefs': bowser.uriPrefs, 'askOnUnmatchedURI': bowser.askOnUnmatchedURI}
     if not path.exists(configDir): os.makedirs(configDir)
     if not path.exists(cFile): os.mknod(cFile)
@@ -148,6 +150,7 @@ def setup(init = False):
     tmp = {'scheme': False, 'authority': True, 'path': False, 'query': False, 'fragment': False}
     if not bool(bowser.uriPrefs): bowser.uriPrefs = {'youtube.com': {'defaultBrowser': bowser.defaultBrowser, 'uriOptions': tmp}, 'youtu.be': {'defaultBrowser': bowser.defaultBrowser, 'uriOptions': tmp}}
     saveConfig()
+    readConfig()
     print('Setup completed and config saved');
 def getxdgDefaultWebBrowser():
     currentBrowser = subprocess.check_output(['xdg-settings', 'get', 'default-web-browser']).decode('utf-8').replace('\n', '')
@@ -178,12 +181,10 @@ def openBrowser(overrideBrowser = False):
                 print('---Match found') 
                 execCmd = bowser.browserApps.get(bowser.uriPrefs[pref]['defaultBrowser'])[1].replace("%u", "").replace("%U", "").strip()
                 process = subprocess.Popen([execCmd, bowser.URI], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    
-
-    bowser.bowserSettings.root.lift();
 
     if (bowser.askOnUnmatchedURI and not matchFound):
         bowser.bowserSettings.openUnmatchedURIDialog()
+        #if (bowser.bowserSettings.settingsApp != None): bowser.bowserSettings.appear() # Show settings dialog if it is open
     elif (not matchFound):
         execCmd = bowser.browserApps.get(bowser.uriPrefs[pref]['defaultBrowser'])[1].replace("%u", "").replace("%U", "").strip()
         process = subprocess.Popen([execCmd, bowser.URI], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -195,7 +196,6 @@ def openBrowser(overrideBrowser = False):
 if not (path.exists(configFile)): setup(True)
 else: readConfig(); 
 def settingsVars():
-    bowser.cleanConfig = cleanConfig
     bowser.saveConfig = saveConfig
     bowser.readConfig = readConfig
     bowser.getxdgDefaultWebBrowser = getxdgDefaultWebBrowser

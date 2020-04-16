@@ -21,7 +21,7 @@ Run Bowser with python3 or bash to install:<br/>
 To manage rules and settings, open Bowser from your desktop application menu or with the Bowser icon in the new link menu.<br/>
 
 Bowser will create new rules for you as you open links.<br/>
-This can be disabled in:&nbsp; ```Settings Menu -> Default Web Browser -> Always Ask```<br/>
+This can be disabled in:&nbsp; ```Settings Menu -> Create rules on new links```<br/>
 
 #### When you open a link:
 
@@ -33,6 +33,7 @@ You can also choose which parts of the web address to include, the default is on
 #### Managing Rules
 
 ![Bowser Settings GUI](doc/BowserGUI.png?raw=true "Screenshot of Bowser Settings GUI")
+![Bowser Settings GUI](doc/BowserGUI2.png?raw=true "Screenshot of Bowser Settings GUI")
 <br/>
  Select a rule and the web browser it opens with will show in the drop down box, changing it will apply it to that rule.<br/>
  Double click a rule to edit it. ```Delete Rule``` will delete the selected rule. ```New Rule``` will let you create a rule.<br/>
@@ -49,8 +50,8 @@ Enter the text to search for and select which parts of the URL you would like fo
 Save your rules and settings for later:&nbsp; ```File Menu -> Export Configuration```<br/>
 Load rules and settings from a file:&nbsp; ```File Menu -> Import Configuration```<br/>
 Turn Bowser on/off: &nbsp; ```Settings Menu -> Bowser is Enabled/Disabled```<br/>
-Turn the pop up menu for new links on/off:&nbsp; ```Settings Menu -> Default Web Browser -> Always Ask```<br/>
-Open unmatched links with this browser when menu is disabled:&nbsp; ```Settings Menu -> Default Web Browser -> [Web Browser]```<br/>
+Turn the popup menu for new links on/off:&nbsp; ```Settings Menu -> Create rules on new links```<br/>
+Open unmatched links with this browser when popup is disabled:&nbsp; ```Settings Menu -> Default Web Browser -> [Web Browser]```<br/>
 Update which web browsers Bowser knows:&nbsp; ```Settings Menu -> Detect installed web browsers```<br/>
 Find this page:&nbsp; ```Help Menu -> About```<br/>
 
