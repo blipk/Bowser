@@ -1,36 +1,36 @@
 # Bowser for linux
 
-Becomes the default web browser and allows you to set up rules to open specific websites in specific web browsers.
+Create rules to open specific websites in specific web browsers.
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/deltadevelopments)
 [![Website](https://img.shields.io/badge/Bowser-Homepage-blue)](https://github.com/blipk/Bowser)
 
 
-## Installation
+### Installation
 
-##### Desktop
+###### Desktop
 Double Click the 'Install Bowser' desktop file.
 
-##### Command Line
+###### Command Line
 Run Bowser with python3 or bash to install:<br/>
  ```./bowser.py``` &nbsp;&nbsp; ```OR```<br/>
  ```python3 bowser.py```  
 
-## General Usage
+### General Usage
 
 To manage rules and settings, open Bowser from your desktop application menu or with the Bowser icon in the new link menu.<br/>
 
 Bowser will create new rules for you as you open links.<br/>
 This can be disabled in:&nbsp; ```Settings Menu -> Create rules on new links```<br/>
 
-#### When you open a link:
+##### When you open a link
 
 ![Bowser Ask Rule Dialog](doc/BowserAskRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
 <br/>
 A list of your web browsers will show, choose which browser you want the website to open with from now on.<br>
 You can also choose which parts of the web address to include, the default is only the website name.<br/>
 
-#### Managing Rules
+##### Managing Rules
 
 ![Bowser Settings GUI](doc/BowserGUI.png?raw=true "Screenshot of Bowser Settings GUI")
 ![Bowser Settings GUI](doc/BowserGUI2.png?raw=true "Screenshot of Bowser Settings GUI")
@@ -39,14 +39,14 @@ You can also choose which parts of the web address to include, the default is on
  Double click a rule to edit it. ```Delete Rule``` will delete the selected rule. ```New Rule``` will let you create a rule.<br/>
 
 
-#### Creating/Editing Rules
+##### Creating/Editing Rules
 
 ![Bowser Add Rule Dialog](doc/BowserAddRuleGUI.png?raw=true "Screenshot of Bowser Add Rule Dialog")
 <br/>
 
 Enter the text to search for and select which parts of the URL you would like for it to be searched in.
 
-#### Menu Options
+##### Menu Options
 Save your rules and settings for later:&nbsp; ```File Menu -> Export Configuration```<br/>
 Load rules and settings from a file:&nbsp; ```File Menu -> Import Configuration```<br/>
 Turn Bowser on/off: &nbsp; ```Settings Menu -> Bowser is Enabled/Disabled```<br/>
@@ -55,7 +55,8 @@ Open unmatched links with this browser when popup is disabled:&nbsp; ```Settings
 Update which web browsers Bowser knows:&nbsp; ```Settings Menu -> Detect installed web browsers```<br/>
 Find this page:&nbsp; ```Help Menu -> About```<br/>
 
-## CLI Usage
+### CLI Usage 
+
 Open the Bowser rules settings window:<br/>
  ```python3 ~/.config/bowser/bowser.py``` &emsp; ```OR```<br/>
  ```python3 ~/.config/bowser/bowser.py --settings```
@@ -69,14 +70,14 @@ Reset your default browser to handle all URLs:<br/>
 Enable Bowser and sets rules to active:<br/>
  ```python3 ~/.config/bowser/bowser.py --enable```
 
-## Support
+### Support
 
 This should work in most linux desktop environments.<br/>
 May require these dependencies in some environments.<br/>
 ```sudo apt install python3 python3-tk ``` &nbsp; ```or``` <br/>
 ```sudo yum install python3 python3-tkinter```
 
-##   Licence
+### Licence
 
 ```
 This file is part of the Bowser linux application

@@ -72,7 +72,7 @@ class tkAddEditDialog(simpledialog.Dialog):
         stick = tk.E
         state = 'disabled'
         for element in splitURI:
-            if ((element.find('NoTrim') > -1) or splitURI[element] == None or splitURI[element] == ''): continue
+            if ((element.find('Trim') > -1) or splitURI[element] == None or splitURI[element] == ''): continue
             if (self.uriParts[element]): state = 'normal'
             self.urlLabels.append(tk.Label(selfFrame, text=splitURI[element], bd = 0, padx = 0, fg = 'green', disabledforeground = '#F47A00', state = state))
             self.urlLabels[i].grid(row=3, column=i, sticky=stick)
@@ -149,12 +149,12 @@ class tkUnmatchedURIDialog(tk.Frame):
         stick = tk.E
         state = 'normal'
         for element in splitURI:
-            if ((element.find('NoTrim') > -1 and element != 'authorityNoTrim') or element == 'scheme' or element == 'authority' or splitURI[element] == None or splitURI[element] == ''): continue
+            if ((element.find('Trim') > -1 and element != 'authorityTrim') or element == 'scheme' or element == 'authority' or splitURI[element] == None or splitURI[element] == ''): continue
             if (i > 0): state = 'disabled'
             maxLength = 7
             if (i == 0): maxLength = 40
             if (i == 1): maxLength = 15
-            self.urlLabels.append(tk.Label(master, state = state, bd = 0, padx = 0, fg = 'green', disabledforeground = 'red', bg='#AAAAAA', highlightthickness = 0))
+            self.urlLabels.append(tk.Label(master, state = state, anchor = stick, bd = 0, padx = 0, fg = 'green', disabledforeground = 'red', bg='#AAAAAA', highlightthickness = 0))
             self.urlLabels[i].fullText = splitURI[element]
             self.urlLabels[i].elementName = element
             labelText = (splitURI[element][:maxLength] + '..') if len(splitURI[element]) > maxLength else splitURI[element]
@@ -207,8 +207,8 @@ class tkUnmatchedURIDialog(tk.Frame):
             root.deiconify()
         else: appear()
     def togglePref(self, i = 0, event = None):
+        allowed = True
         if (self.urlLabels[i].cget('state') == 'normal'): 
-            allowed = True
             try:
                 if(self.urlLabels[i+1].cget('state') == 'normal' and self.urlLabels[i-1].cget('state') == 'normal'):
                      allowed = False
@@ -234,7 +234,6 @@ class tkUnmatchedURIDialog(tk.Frame):
 
             if (allowed): self.urlLabels[i].config(state = 'disabled')
         else:
-            allowed = True
             try:
                 if(self.urlLabels[i+1].cget('state') == 'disabled' and self.urlLabels[i-1].cget('state') == 'disabled'): allowed = False
             except:
@@ -248,7 +247,6 @@ class tkUnmatchedURIDialog(tk.Frame):
             if (allowed): self.urlLabels[i].config(state = 'normal')
     def cancel(self):
         global unmatchedApp, settingsApp
-        bowser.openAskBrowser = False
         bowser.URI = ''
         unmatchedApp = None
         self.destroy()
@@ -263,7 +261,7 @@ class tkUnmatchedURIDialog(tk.Frame):
         for label in self.urlLabels:
             if (label.cget('state') != 'disabled'): 
                 outURI += label.fullText
-                uriOptions[label.elementName.replace("NoTrim", "")] = True
+                uriOptions[label.elementName.replace("Trim", "")] = True
             if (first):     #Drop the www. in the domain for the pref
                 if (outURI[:4] == 'www.'): outURI = outURI[4:]
                 first = False
@@ -272,7 +270,6 @@ class tkUnmatchedURIDialog(tk.Frame):
 
         bowser.uriPrefs.update(out)
         bowser.saveConfig()
-        bowser.openAskBrowser = False
         bowser.openBrowser()
         if (settingsApp != None): settingsApp.ui_update()
         self.cancel()

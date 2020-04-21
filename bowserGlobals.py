@@ -30,9 +30,8 @@ config = {}
 browserApps = {}
 uriPrefs = {}
 defaultBrowser = ''
-askOnUnmatchedURI = bool()
-openAskBrowser = False
 URI = ''
+askOnUnmatchedURI = bool()
 bowserSettings = None
 
 import re
@@ -48,11 +47,11 @@ def splitURI(inURI):
         inURI = 'foo://' + inURI
         output = regex.match(inURI)
         
-    splitURI = {'scheme': output.group('s1'), 'schemeNoTrim': output.group('s0'), 
-                'authority': output.group('a1'), 'authorityNoTrim': output.group('a0'), 
+    splitURI = {'scheme': output.group('s1'), 'schemeTrim': output.group('s0'), 
+                'authority': output.group('a1'), 'authorityTrim': output.group('a0'), 
                 'path': output.group('p0'), 
-                'query': output.group('q1'), 'queryNoTrim': output.group('q0'), 
-                'fragment': output.group('f1'), 'fragmentNoTrim': output.group('f1')}
+                'query': output.group('q1'), 'queryTrim': output.group('q0'), 
+                'fragment': output.group('f1'), 'fragmentTrim': output.group('f0')}
     
     if (splitURI['scheme'] == 'foo:'):
         splitURI['scheme'] = ''

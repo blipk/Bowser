@@ -122,7 +122,7 @@ def setup(init = False):
     installedApps += [userAppPath+f for f in listdir(userAppPath) if isfile(join(userAppPath, f))]
     currentBrowser = getxdgDefaultWebBrowser()
     for app in installedApps:
-        if (app.find('bowser.desktop') > -1): continue
+        if (app.find('bowser.desktop') > -1 or app.find('bowser-gnome.desktop') > -1): continue
         f = open(app, "r"); contents = f.read(); f.close()
 
         catLoc = contents.find("Categories=")
@@ -146,7 +146,7 @@ def setup(init = False):
     bowser.defaultBrowser = currentBrowser
     if (init): bowser.askOnUnmatchedURI = True
     if (init and not currentBrowser.find('bowser.desktop') > -1): setxdgDefaultWebBrowser();
-    if (bowser.defaultBrowser.find('bowser.desktop') > -1 or bowser.defaultBrowser == ''):  bowser.defaultBrowser = list(bowser.browserApps)[0]
+    if (bowser.defaultBrowser.find('bowser.desktop') > -1 or bowser.defaultBrowser.find('bowser-gnome.desktop') > -1 or bowser.defaultBrowser == ''):  bowser.defaultBrowser = list(bowser.browserApps)[0]
     tmp = {'scheme': False, 'authority': True, 'path': False, 'query': False, 'fragment': False}
     if not bool(bowser.uriPrefs): bowser.uriPrefs = {'youtube.com': {'defaultBrowser': bowser.defaultBrowser, 'uriOptions': tmp}, 'youtu.be': {'defaultBrowser': bowser.defaultBrowser, 'uriOptions': tmp}}
     saveConfig()
@@ -159,14 +159,11 @@ def setxdgDefaultWebBrowser(browser='bowser.desktop'):
     pathName, fileName = ntpath.split(browser)
     os.system('xdg-settings set default-web-browser ' + fileName)
     print(browser + ' is now the default browser');
-def openBrowser(overrideBrowser = False):
+def openBrowser():
     print(bowser.URI)
-    browser = bowser.defaultBrowser
-    if (bool(overrideBrowser)): 
-        pathName, fileName = ntpath.split(overrideBrowser)
-    
     splitURI = bowser.splitURI(bowser.URI)    
     matchFound = False
+    matchedBrowsers = list()
     for pref in bowser.Config['uriPrefs']:
         compareURI = ''
         #print('!!!!!!Searching pref', pref, ' against ', bowser.URI)
@@ -175,10 +172,15 @@ def openBrowser(overrideBrowser = False):
             if (bool(splitURI[x]) and x != 'scheme'): compareURI += str(splitURI[x])
             
             #print('compare', compareURI, pref)
-            if (matchFound): continue
+            #if (matchFound): continue          #TO DO: Will currently match against all rules, set up a rule priority tag, e.g. always force http scheme to only its chosen browser, ignoring other matches
             if (str(splitURI[x]).find(pref) > -1 or compareURI.find(pref) > -1 and bool(compareURI)):
+                print('---Match found: ' + splitURI[x] + ' for: ' + bowser.uriPrefs[pref]['defaultBrowser']) 
+                browserAlreadyOpened = False
+                for matchedBrowser in matchedBrowsers:      #Only open multiple matches in each browser once
+                    if (matchedBrowser == bowser.uriPrefs[pref]['defaultBrowser']): browserAlreadyOpened = True
+                if (matchFound and browserAlreadyOpened): continue
                 matchFound = True
-                print('---Match found') 
+                matchedBrowsers.append(bowser.uriPrefs[pref]['defaultBrowser'])
                 execCmd = bowser.browserApps.get(bowser.uriPrefs[pref]['defaultBrowser'])[1].replace("%u", "").replace("%U", "").strip()
                 process = subprocess.Popen([execCmd, bowser.URI], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -186,7 +188,7 @@ def openBrowser(overrideBrowser = False):
         bowser.bowserSettings.openUnmatchedURIDialog()
         #if (bowser.bowserSettings.settingsApp != None): bowser.bowserSettings.appear() # Show settings dialog if it is open
     elif (not matchFound):
-        execCmd = bowser.browserApps.get(bowser.uriPrefs[pref]['defaultBrowser'])[1].replace("%u", "").replace("%U", "").strip()
+        execCmd = bowser.browserApps.get(bowser.defaultBrowser)[1].replace("%u", "").replace("%U", "").strip()
         process = subprocess.Popen([execCmd, bowser.URI], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if (bowser.bowserSettings == None):
             if (bowser.bowserSettings.settingsApp != None): bowser.bowserSettings.root.lift()
