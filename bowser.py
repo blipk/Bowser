@@ -38,6 +38,7 @@ import bowserGlobals as bowser
 
 appPath = '/usr/share/applications/'
 userAppPath = bowser.homePath+'/.local/share/applications/'
+snapcraftAppPath = '/var/lib/snapd/desktop/applications/';
 configDir = bowser.homePath + '/.config/bowser/'
 configFile = bowser.homePath + '/.config/bowser/bowser.conf'
 uriFile = bowser.homePath + '/.config/bowser/.openuri'
@@ -120,6 +121,8 @@ def setup(init = False):
     bowser.browserApps = {}
     installedApps = [appPath+f for f in listdir(appPath) if isfile(join(appPath, f))]
     installedApps += [userAppPath+f for f in listdir(userAppPath) if isfile(join(userAppPath, f))]
+    if (path.exists(snapcraftAppPath)): installedApps += [snapcraftAppPath+f for f in listdir(snapcraftAppPath) if isfile(join(snapcraftAppPath, f))]
+
     currentBrowser = getxdgDefaultWebBrowser()
     for app in installedApps:
         if (app.find('bowser.desktop') > -1 or app.find('bowser-gnome.desktop') > -1): continue
