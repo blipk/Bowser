@@ -58,6 +58,7 @@ def isRunning(count = 0):
     else: return False
 def passURI():
     if (bowser.URI == '' or bowser.URI == None): return
+    if (not os.path.isfile(uriFile)): return
     with open(uriFile, 'a+') as file: file.write(bowser.URI+"\r\n"); file.close()
 def checkURI():
     bowser.bowserSettings.root.after(1000, checkURI)
@@ -65,7 +66,7 @@ def checkURI():
     if (bowser.bowserSettings.settingsApp != None): bowser.bowserSettings.settingsApp.ui_update()
 
     if (bowser.bowserSettings.unmatchedApp != None): return #Wait for current prompt
-    if (not os.path.isfile(uriFile)):  return
+    if (not os.path.isfile(uriFile)): return
     lines = list()
     head = tail = None
     with open(uriFile, 'r') as file: 
