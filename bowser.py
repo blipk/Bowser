@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
- * Bowser for linux. 
+ * Bowser for linux.
  * Uses XDG desktop entries to find installed web browsers and sets itself as the default,
  * allowing you to set up rules that will match a string against URLs and open them with a specific browser.
  *
@@ -9,7 +9,7 @@
  *
  * This file is part of the Bowser linux application
  * Copyright (C) 2020 A.D. - http://kronosoul.xyz
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
@@ -53,12 +53,15 @@ def isRunning(count = 0):
     process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     my_pid, err = process.communicate()
 
-    print (my_pid.splitlines())
+    pids = [pid.decode('UTF-8') for pid in my_pid.splitlines() if pid != process.pid]
+    print(process.pid)
+    print(my_pid.splitlines())
+    print(pids)
+
     if len(my_pid.splitlines()) > count: return True
     else: return False
 def passURI():
     if (bowser.URI == '' or bowser.URI == None): return
-    if (not os.path.isfile(uriFile)): return
     with open(uriFile, 'a+') as file: file.write(bowser.URI+"\r\n"); file.close()
 def checkURI():
     bowser.bowserSettings.root.after(1000, checkURI)
@@ -69,15 +72,15 @@ def checkURI():
     if (not os.path.isfile(uriFile)): return
     lines = list()
     head = tail = None
-    with open(uriFile, 'r') as file: 
+    with open(uriFile, 'r') as file:
         head = file.read().split('\n', 1)
         lines = file.read().splitlines(True)
         try: bool(head[1])
-        except IndexError: head.append('') 
-        bowser.URI = head[0]; 
+        except IndexError: head.append('')
+        bowser.URI = head[0];
         file.close()
     with open(uriFile, 'w') as file: file.write(head[1]); file.close()
-    if (bowser.URI != ''): 
+    if (bowser.URI != ''):
         if (bowser.URI[0:2] == '--'):
             if (bowser.URI == '--settings'): bowser.bowserSettings.appear()
             bowser.URI = ''
@@ -118,7 +121,7 @@ def setup(init = False):
     if not path.exists(bowser.homePath+'/.local/share/icons/hicolor/256x256/apps/'): os.makedirs(bowser.homePath+'/.local/share/icons/hicolor/256x256/apps/')
     if not path.exists(bowser.homePath+'/.local/share/icons/hicolor/scalable/apps/'): os.makedirs(bowser.homePath+'/.local/share/icons/hicolor/scalable/apps/')
     os.system("cp bowser.svg ~/.local/share/icons/hicolor/scalable/apps && xdg-icon-resource install --novendor --context apps --size 256 bowser.png bowser")
-    
+
     bowser.browserApps = {}
     installedApps = [appPath+f for f in listdir(appPath) if isfile(join(appPath, f))]
     installedApps += [userAppPath+f for f in listdir(userAppPath) if isfile(join(userAppPath, f))]
@@ -130,7 +133,7 @@ def setup(init = False):
         f = open(app, "r"); contents = f.read(); f.close()
 
         catLoc = contents.find("Categories=")
-        if (catLoc > -1): 
+        if (catLoc > -1):
             cats = contents[catLoc:contents.find("\n", catLoc)]
             if (cats.find("WebBrowser") > -1):
                 print('Adding ' + app)
@@ -138,7 +141,7 @@ def setup(init = False):
                 execLoc = contents.find("Exec=")
                 mimesLoc = contents.find("MimeType=")
                 iconLoc = contents.find("Icon=")
-                bowser.browserApps.update({app: [  
+                bowser.browserApps.update({app: [
                     contents[nameLoc+5:contents.find("\n", nameLoc)],
                     contents[execLoc+5:contents.find("\n", execLoc)],
                     list(filter(    lambda x: x != "", contents[mimesLoc+9:contents.find("\n", mimesLoc)].split(';') )),
@@ -165,7 +168,7 @@ def setxdgDefaultWebBrowser(browser='bowser.desktop'):
     print(browser + ' is now the default browser');
 def openBrowser():
     print(bowser.URI)
-    splitURI = bowser.splitURI(bowser.URI)    
+    splitURI = bowser.splitURI(bowser.URI)
     matchFound = False
     matchedBrowsers = list()
     for pref in bowser.Config['uriPrefs']:
@@ -174,11 +177,11 @@ def openBrowser():
         for x in bowser.Config['uriPrefs'][pref]['uriOptions']:
             if (bowser.Config['uriPrefs'][pref]['uriOptions'][x] == False): continue;
             if (bool(splitURI[x]) and x != 'scheme'): compareURI += str(splitURI[x])
-            
+
             #print('compare', compareURI, pref)
             #if (matchFound): continue          #TO DO: Will currently match against all rules, set up a rule priority tag, e.g. always force http scheme to only its chosen browser, ignoring other matches
             if (str(splitURI[x]).find(pref) > -1 or compareURI.find(pref) > -1 and bool(compareURI)):
-                print('---Match found: ' + splitURI[x] + ' for: ' + bowser.uriPrefs[pref]['defaultBrowser']) 
+                print('---Match found: ' + splitURI[x] + ' for: ' + bowser.uriPrefs[pref]['defaultBrowser'])
                 browserAlreadyOpened = False
                 for matchedBrowser in matchedBrowsers:      #Only open multiple matches in each browser once
                     if (matchedBrowser == bowser.uriPrefs[pref]['defaultBrowser']): browserAlreadyOpened = True
@@ -200,7 +203,7 @@ def openBrowser():
 
 #MAIN
 if not (path.exists(configFile)): setup(True)
-else: readConfig(); 
+else: readConfig();
 def settingsVars():
     bowser.saveConfig = saveConfig
     bowser.readConfig = readConfig
@@ -210,12 +213,12 @@ def settingsVars():
     bowser.openBrowser = openBrowser
     bowser.checkURI = checkURI
 def settings():
-    if (bool(bowser.bowserSettings)): 
+    if (bool(bowser.bowserSettings)):
         if (callable(bowser.bowserSettings)):
             settingsVars()
             bowser.bowserSettings()
         else: bowser.bowserSettings.start()
-if __name__ == "__main__": 
+if __name__ == "__main__":
     settingsVars()
     bowser.bowserSettings = importlib.import_module('bowserSettings')
 
