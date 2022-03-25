@@ -58,7 +58,7 @@ def isRunning(count = 0):
     print(my_pid.splitlines())
     print(pids)
 
-    if len(my_pid.splitlines()) > count: return True
+    if len(pids) > count: return True
     else: return False
 def passURI():
     if (bowser.URI == '' or bowser.URI == None): return
