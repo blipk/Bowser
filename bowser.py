@@ -53,7 +53,7 @@ def isRunning(count = 0):
     process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     my_pid, err = process.communicate()
 
-    pids = [pid.decode('UTF-8') for pid in my_pid.splitlines() if pid != process.pid]
+    pids = [pid.decode('UTF-8') for pid in my_pid.splitlines() if str(pid) != str(process.pid)]
     print(process.pid)
     print(my_pid.splitlines())
     print(pids)
