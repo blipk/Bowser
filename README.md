@@ -13,7 +13,7 @@ Double Click the 'Install Bowser' desktop file.
 
 ###### Command Line
 Run Bowser with python3 or bash to install:<br/>
- ```./bowser.py``` &nbsp;&nbsp; ```OR```<br/>
+ ```./bowser.py``` &nbsp;```OR```<br/>
  ```python3 bowser.py```  
 
 ### General Usage
@@ -21,7 +21,7 @@ Run Bowser with python3 or bash to install:<br/>
 To manage rules and settings, open Bowser from your desktop application menu or with the Bowser icon in the new link menu.<br/>
 
 Bowser will create new rules for you as you open links.<br/>
-This can be disabled in:&nbsp; ```Settings Menu -> Create rules on new links```<br/>
+This can be disabled in:```Settings Menu -> Create rules on new links```<br/>
 
 ##### When you open a link
 
@@ -47,13 +47,13 @@ You can also choose which parts of the web address to include, the default is on
 Enter the text to search for and select which parts of the URL you would like for it to be searched in.
 
 ##### Menu Options
-Save your rules and settings for later:&nbsp; ```File Menu -> Export Configuration```<br/>
-Load rules and settings from a file:&nbsp; ```File Menu -> Import Configuration```<br/>
-Turn Bowser on/off: &nbsp; ```Settings Menu -> Bowser is Enabled/Disabled```<br/>
-Turn the popup menu for new links on/off:&nbsp; ```Settings Menu -> Create rules on new links```<br/>
-Open unmatched links with this browser when popup is disabled:&nbsp; ```Settings Menu -> Default Web Browser -> [Web Browser]```<br/>
-Update which web browsers Bowser knows:&nbsp; ```Settings Menu -> Detect installed web browsers```<br/>
-Find this page:&nbsp; ```Help Menu -> About```<br/>
+```File Menu -> Export Configuration```&nbsp; Save your rules and settings for later<br/>
+```File Menu -> Import Configuration```&nbsp; Load rules and settings from before<br/>
+```Settings Menu -> Bowser is Enabled/Disabled```&nbsp; Turn Bowser on/off: <br/>
+```Settings Menu -> Create rules on new links```&nbsp; Turn the popup menu for new links on/off<br/>
+```Settings Menu -> Default Web Browser -> [Web Browser]```&nbsp; Open unmatched links with this browser when popup is disabled<br/>
+```Settings Menu -> Detect installed web browsers```&nbsp; Update which web browsers Bowser knows:<br/>
+```Help Menu -> About```&nbsp; Find this page<br/>
 
 ### CLI Usage 
 
@@ -74,24 +74,34 @@ Enable Bowser and sets rules to active:<br/>
 
 This should work in most linux desktop environments.<br/>
 May require these dependencies in some environments.<br/>
-```sudo apt install python3 python3-tk ``` &nbsp; ```or``` <br/>
+```sudo apt install python3 python3-tk ``` ```or``` <br/>
 ```sudo yum install python3 python3-tkinter```
 
 ### Licence
 
 ```
 This file is part of the Bowser linux application
-Copyright (C) 2020 A.D. - http://kronosoul.xyz
+Copyright (C) 2020 A.D.
 ```
 
 ```
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or
-(at your option) any later version.
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
-This program is distributed in the hope this it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
