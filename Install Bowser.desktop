@@ -6,6 +6,6 @@ GenericName=Install Bowser Web Browser Chooser
 Comment=Install Bowser: Set up rules to open specific URLs in specific web browsers
 Exec=bash -c 'THIS="%k" && cd "$(dirname \"$THIS\")" && python3 bowser.py --setup'
 Icon=bowser.png
-Terminal=true
+Terminal=false
 Type=Application
 X-Desktop-File-Install-Version=0.24
